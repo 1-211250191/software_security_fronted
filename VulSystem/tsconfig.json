@@ -4,6 +4,7 @@
     "allowJs": true,
     "checkJs": true,
     "esModuleInterop": true,
+    "jsx": "preserve",
     "types": [
       "element-plus/global"
     ]

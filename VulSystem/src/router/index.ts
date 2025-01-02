@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-
+import ProjectsDetail from '@/views/ProjectsDetail.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -14,8 +13,14 @@ const router = createRouter({
       component: () => import('../views/ProjectsInfo.vue'),
     },
     {
+      path: '/projects/info/:project',
+      name: '项目分析',
+      component: ProjectsDetail,
+      props: true,
+    },
+    {
       path: '/projects/analy',
-      name: '项目漏洞分析',
+      name: '项目综合分析',
       component: () => import('../views/ProjectsAnaly.vue'),
     },
     {
