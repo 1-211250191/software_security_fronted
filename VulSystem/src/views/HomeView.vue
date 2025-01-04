@@ -122,7 +122,6 @@ const titles: NavTitle[] = [
   flex-direction: column;
 }
 
-// 这里似乎不用把header写成fixed，因为header底下也没有其他内容
 .header {
   z-index: 5;
   background-color: #336fff;
