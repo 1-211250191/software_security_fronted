@@ -117,13 +117,13 @@ const titles: NavTitle[] = [
 <style scoped>
 .home_container {
   box-sizing: border-box;
-  padding-top: 64px;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+// 这里似乎不用把header写成fixed，因为header底下也没有其他内容
 .header {
-  position: fixed;
-  top: 0;
   z-index: 5;
   background-color: #336fff;
   height: 64px;
