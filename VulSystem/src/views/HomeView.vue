@@ -1,5 +1,5 @@
 <template>
-  <el-container class="home_container">
+  <el-container class="home_container" :class="{ login: isLoginPage }">
     <el-header class="header" v-if="!isLoginPage">
       <h2>库灵之眼</h2>
       <div class="user-entry">
@@ -117,12 +117,17 @@ const titles: NavTitle[] = [
 <style scoped>
 .home_container {
   box-sizing: border-box;
+  padding-top: 64px;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+}
+
+.home_container.login{
+  padding-top: 0;
 }
 
 .header {
+  position: fixed;
+  top: 0;
   z-index: 5;
   background-color: #336fff;
   height: 64px;
