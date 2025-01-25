@@ -2,7 +2,7 @@
 import type { ReportInfo } from './const';
 import HighlightSearch from "@/components/text/HighlightSearch.vue";
 import {getSourceIcon, getSourceName} from "../../utils/parseSource.ts";
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps<{
   reportInfoList: ReportInfo[]
@@ -40,6 +40,10 @@ const displayedPages = computed(() => {
   return pages
 })
 
+// reset current page when list changes
+watch(() => props.reportInfoList, () => {
+  currentPage.value = 1
+})
 
 </script>
 
@@ -170,6 +174,7 @@ const displayedPages = computed(() => {
   font-size: 14px;
   line-height: 20px;
   font-weight: bold;
+  color: #096be0;
 }
 
 .danger-card-table {
