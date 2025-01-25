@@ -1,3 +1,4 @@
+// Types
 export interface DangerInfo {
   label: string
   desc: string
@@ -10,9 +11,10 @@ export interface DangerInfo {
 export interface ReportInfo {
   reportName: string // 漏洞报告名
   reportId: string // 编号
-  dangerType: string[] // 漏洞类型
   time: string // 披露时间
   isCve: boolean
   isPoc: boolean
   ref:string //漏洞来源
 }
+
+// Constants
