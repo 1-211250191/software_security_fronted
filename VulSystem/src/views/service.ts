@@ -10,4 +10,11 @@ export const api = {
     console.log(info)
     return axios.post('')
   },
+
+  getProjectDetail(projectId: number) {
+    return axios({
+      method: 'get',
+      url: `/project/statistics?companyId=${projectId}`,
+    })
+  },
 }

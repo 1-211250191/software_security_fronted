@@ -7,7 +7,7 @@
       <span class="bread-item">项目管理</span>
     </el-breadcrumb-item>
     <el-breadcrumb-item :to="{ path: '/projects/info' }">项目信息</el-breadcrumb-item>
-    <el-breadcrumb-item v-if="project">{{ project }}</el-breadcrumb-item>
+    <el-breadcrumb-item v-if="projectInfo && projectInfo.projectName">{{ projectInfo.projectName }}</el-breadcrumb-item>
   </el-breadcrumb>
   <div class="data-infos">
     <!-- <v-chart ref="mychart1" class="chart"></v-chart> -->
@@ -18,16 +18,16 @@
     </DataCard>
     <DataCard title="项目基础信息">
       <template #main>
-        <el-descriptions title="" :column="2" border style="margin-top: 15px;">
-          <el-descriptions-item label="仓库名" :span="2">{{ projectInfo.title }}</el-descriptions-item>
-          <el-descriptions-item label="仓库描述" :span="2">{{ projectInfo.desc }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ projectInfo.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="最新扫描时间">{{ projectInfo.detectTime }}</el-descriptions-item>
-          <!-- <el-descriptions-item label="Remarks">
-            <el-tag size="small">School</el-tag>
-          </el-descriptions-item> -->
+        <el-descriptions title="" :column="2" border style="margin-top: 15px;" v-if="projectInfo">
+          <el-descriptions-item label="仓库名" :span="2">{{ projectInfo.projectName }}</el-descriptions-item>
+          <el-descriptions-item label="仓库描述" :span="2">{{ projectInfo.projectDescription }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ timeFormatter(projectInfo.createTime) }}</el-descriptions-item>
+          <el-descriptions-item label="最新扫描时间">{{ timeFormatter(projectInfo.lastScanTime) }}</el-descriptions-item>
           <el-descriptions-item label="检测标准阈值">
-            {{ projectInfo.widgt ?? 10 }}
+            {{ projectInfo.riskThreshold ?? 0.45 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="项目语言">
+            {{ projectInfo.language ?? 'java' }}
           </el-descriptions-item>
         </el-descriptions>
       </template>
@@ -50,12 +50,9 @@
       </div>
     </template>
   </DataCard>
-  <DataCard title="问题列表">
-    <template #right>
-      <el-button type="primary" plain>查看修复建议</el-button>
-    </template>
+  <DataCard title="问题列表" width="auto">
     <template #main>
-      <DangerList :dangerInfoList="dangerList" />
+      <DangerCard v-for="danger in dangerList" :key="danger.id" :info="danger" />
     </template>
   </DataCard>
 </template>
@@ -65,23 +62,49 @@ import { ArrowRight, Search, DocumentCopy } from '@element-plus/icons-vue'
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
 import { ProjectStatus, type ProjectInfoDetail } from '@/components/Project/const';
-import { reactive } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import type { DangerInfo } from '@/components/Danger/const';
-defineProps<{
-  project: string
+import { api } from './service';
+import DangerCard from '@/components/Danger/DangerCard.vue';
+const props = defineProps<{
+  projectId: number
 }>();
+const timeFormatter = (dateString: string) => {
+  // 将字符串转换为 Date 对象
+  const date = new Date(dateString);
 
-const projectInfo = reactive<ProjectInfoDetail>(
-  {
-    index: 0,
-    title: '仓库名1',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.HIGH,
-    widgt: 10,
-    createTime: '2024-11-25',
-    detectTime: '2024-12-30'
-  },
-);
+  // 获取年份、月份和日期
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份是0-11，+1后格式化为2位数
+  const day = String(date.getDate()).padStart(2, '0'); // 获取日期并格式化为2位数
+
+  // 将结果拼接为 "year-month-date" 格式
+  const formattedDate = `${year}-${month}-${day}`;
+
+  console.log(formattedDate); // 输出: "2025-02-13"
+  return formattedDate
+}
+const projectInfo = ref<ProjectInfoDetail>({
+  "id": 1,
+  "projectName": "project1",
+  "createTime": "Fri Feb 14 17:11:38 CST 2025",
+  "projectDescription": "1",
+  "language": "java",
+  "riskThreshold": 10,
+  "highRiskNum": 1,
+  "lowRiskNum": 0,
+  "midRiskNum": 1,
+  "lastScanTime": "2025-02-14T06:00"
+});
+
+// onMounted(() => {
+//   api.getProjectDetail(props.projectId)
+//     .then(res => {
+//       projectInfo.value = res.data.obj
+//     })
+// })
+
+
 const option = {
   xAxis: {
     type: 'category',
@@ -94,7 +117,7 @@ const option = {
     {
       data: [
         {
-          value: 15,
+          value: projectInfo.value?.highRiskNum ?? 0,
           label: {
             position: 'top',
             show: true
@@ -105,7 +128,7 @@ const option = {
           },
         },
         {
-          value: 20,
+          value: projectInfo.value?.midRiskNum ?? 0,
           label: {
             position: 'top',
             show: true
@@ -116,7 +139,7 @@ const option = {
           }
         },
         {
-          value: 12,
+          value: projectInfo.value?.lowRiskNum ?? 0,
           label: {
             show: true,
             position: 'top',
@@ -180,12 +203,24 @@ const data: Tree[] = [
 ]
 const dangerList = reactive<DangerInfo[]>([
   {
-    label: 'com.thoughtworks.xstream: xstream',
-    desc: 'Those using Xstream to seralize XML data may be vulnerable to Denial of Service attacks (DOS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stackoverflow. This effect may support a denial of service attack.',
-    ref: '',
-    language: 'java',
-    risk: 'high',
-    detectTime: '2024-11-25'
+    id: 1,
+    name: "err1",
+    description: "err1",
+    language: "java",
+    time: "Fri Feb 14 00:00:00 CST 2025",
+    riskLevel: "高风险",
+    isaccept: 0,
+    ref: ''
+  },
+  {
+    id: 2,
+    name: "err2",
+    description: "err2",
+    language: "java",
+    time: "Thu Feb 13 00:00:00 CST 2025",
+    riskLevel: "中风险",
+    isaccept: 0,
+    ref: ''
   }
 ])
 </script>

@@ -1,11 +1,18 @@
 // Types
 export interface DangerInfo {
-  label: string
-  desc: string
+  // label: string
+  // desc: string
   ref: string
+  // language: string
+  // risk: string
+  // detectTime: string
+  description: string
+  id: number
+  isaccept: number
   language: string
-  risk: string
-  detectTime: string
+  name: string
+  riskLevel: string
+  time: string
 }
 
 export interface ReportInfo {
@@ -14,7 +21,7 @@ export interface ReportInfo {
   time: string // 披露时间
   isCve: boolean
   isPoc: boolean
-  ref:string //漏洞来源
+  ref: string //漏洞来源
 }
 
 // Constants

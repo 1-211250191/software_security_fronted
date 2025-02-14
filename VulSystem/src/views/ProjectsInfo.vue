@@ -66,8 +66,6 @@
     @confirm="handleAddProject" />
 
 
-
-
 </template>
 
 <script setup lang="ts">

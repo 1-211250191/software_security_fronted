@@ -33,12 +33,18 @@
             </el-icon>
             <template #title>漏洞报告</template>
           </el-menu-item>
-          <!-- <el-menu-item index="/users" class="menu-title">
+          <el-menu-item index="/optimize" class="menu-title">
+            <el-icon>
+              <Setting />
+            </el-icon>
+            <template #title>应用优化</template>
+          </el-menu-item>
+          <el-menu-item index="/users" class="menu-title">
             <el-icon>
               <Discount />
             </el-icon>
             <template #title>用户中心</template>
-          </el-menu-item> -->
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <!-- 右侧内容主体区域 -->
@@ -55,7 +61,7 @@ import router from '@/router'
 import {
   DocumentCopy,
   DataLine, Discount,
-  User,
+  User, Setting
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -106,8 +112,14 @@ const titles: NavTitle[] = [
     index: '1',
     uname: '漏洞报告',
     path: '/reports',
-  }, {
+  },
+  {
     index: '2',
+    uname: '应用优化',
+    path: '/optimize',
+  },
+  {
+    index: '3',
     uname: '用户中心',
     path: '/users',
   },
@@ -121,7 +133,7 @@ const titles: NavTitle[] = [
   height: 100vh;
 }
 
-.home_container.login{
+.home_container.login {
   padding-top: 0;
 }
 

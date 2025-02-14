@@ -13,7 +13,7 @@ const router = createRouter({
       component: () => import('../views/ProjectsInfo.vue'),
     },
     {
-      path: '/projects/info/:project',
+      path: '/projects/info/:projectId',
       name: '项目分析',
       component: ProjectsDetail,
       props: true,
@@ -27,6 +27,11 @@ const router = createRouter({
       path: '/reports',
       name: '漏洞报告',
       component: () => import('../views/ReportsView.vue'),
+    },
+    {
+      path: '/optimize',
+      name: '应用优化',
+      component: () => import('../views/OptimizeView.vue'),
     },
     {
       path: '/login',
