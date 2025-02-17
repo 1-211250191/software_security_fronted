@@ -21,23 +21,31 @@ interface Tags {
 
 const statusTag = computed(() => {
   const tags: Tags = {
-    ['高风险']: {
+    ['High']: {
       color: '#FF5340',
       bgc: '#FFF4F1',
       text: '高风险'
     },
-    ['中风险']: {
+    ['Medium']: {
       color: '#FE8B00',
       bgc: '#FFF5EB',
       text: '中风险'
     },
-    ['低风险']: {
+    ['Low']: {
       color: '#336FFF',
       bgc: '#E5EFFF',
       text: '低风险'
     },
   }
-  return tags[props.info.riskLevel]
+  const res = tags[props.info.riskLevel];
+  if (res) {
+    return res
+  }
+  return {
+    color: '#FF5340',
+    bgc: '#FFF4F1',
+    text: '高风险'
+  }
 })
 console.log('测试问题列表')
 // 本地响应式变量
@@ -86,7 +94,7 @@ const timeFormatter = (dateString: string) => {
         <div class="tag" :style="{ backgroundColor: statusTag.bgc, color: statusTag.color }">{{ statusTag.text }}</div>
         <!-- <div class="tag">{{ 会员专享 }}</div> -->
         <div class="info-tag">
-          {{ info.language }}
+          语言: {{ info.language }}
         </div>
         <div class="info-tag">
           {{ timeFormatter(info.time) }}

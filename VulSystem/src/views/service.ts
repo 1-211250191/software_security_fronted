@@ -12,9 +12,18 @@ export const api = {
   },
 
   getProjectDetail(projectId: number) {
-    return axios({
-      method: 'get',
-      url: `/project/statistics?companyId=${projectId}`,
+    return axios.get('/project/info', {
+      params: {
+        projectid: projectId,
+      },
+    })
+  },
+
+  getVulList(projectId: number) {
+    return axios.get('/project/getVulnerabilities', {
+      params: {
+        id: projectId,
+      },
     })
   },
 }

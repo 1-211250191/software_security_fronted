@@ -30,6 +30,7 @@ const errorHandle = (status: number, info: string) => {
 // 1.创建网络请求对象
 const instance = axios.create({
   // 这里放网络请求的公共配置
+  baseURL: 'http://localhost:8080', // 设置基础 URL
   timeout: 5000,
 })
 
@@ -47,7 +48,7 @@ instance.interceptors.request.use(
   },
   (error) => {
     // 拦截器失败函数
-
+    console.log('请求发送失败')
     // 返回错误信息
     return Promise.reject(error)
   },
@@ -56,6 +57,7 @@ instance.interceptors.request.use(
 // 拦截器----获取数据之前
 instance.interceptors.response.use(
   (response) => {
+    console.log(`响应response: ${response}`)
     // 拦截器成功函数
     return response.status == 200 ? Promise.resolve(response) : Promise.reject(response)
   },
