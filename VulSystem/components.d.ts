@@ -51,6 +51,8 @@ declare module 'vue' {
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
     Llm: typeof import('./src/components/Optimize/Llm.vue')['default']
+    LLMHelper: typeof import('./src/components/LLMHelper/LLMHelper.vue')['default']
+    LLMHelperBody: typeof import('./src/components/LLMHelper/LLMHelperBody.vue')['default']
     LlmInfo: typeof import('./src/components/Optimize/LlmInfo.vue')['default']
     PInfo: typeof import('./src/components/Project/PInfo.vue')['default']
     ProjectForm: typeof import('./src/components/Project/ProjectForm.vue')['default']

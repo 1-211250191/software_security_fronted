@@ -52,6 +52,7 @@
         <!-- 路由占位符 -->
         <RouterView />
       </el-main>
+      <LLMHelper class="llm-helper"/>
     </el-container>
   </el-container>
 </template>
@@ -65,6 +66,7 @@ import {
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import LLMHelper from "@/components/LLMHelper/LLMHelper.vue";
 const route = useRoute();
 
 const defaultIndex = computed(() => {
@@ -186,5 +188,12 @@ const titles: NavTitle[] = [
 .home-main {
   padding: 25px;
   margin-left: 200px;
+}
+
+.llm-helper {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  margin: 20px;
 }
 </style>
