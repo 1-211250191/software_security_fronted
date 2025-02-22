@@ -58,6 +58,7 @@ declare module 'vue' {
     PInfo: typeof import('./src/components/Project/PInfo.vue')['default']
     ProjectForm: typeof import('./src/components/Project/ProjectForm.vue')['default']
     ReportList: typeof import('./src/components/Danger/ReportList.vue')['default']
+    ReportListTable: typeof import('./src/components/Danger/ReportListTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

@@ -39,10 +39,17 @@
       </div>
     </div>
 
-    <ReportList :reportInfoList="filteredReports" :search-query="searchQuery" v-if="filteredReports.length > 0" />
-    <div v-else>
-      <el-empty description="暂无数据" :image-size="120"/>
-    </div>
+    <LoadingFrames v-if="isLoading" class="loading-frames"/>
+    <ReportList
+      :reportInfoList="reportList"
+      :search-query="searchQuery"
+      :current-page="currentPage"
+      :total-items="totalItems"
+      :total-pages="totalPages"
+      :filtered-reports="filteredReports"
+      @update:currentPage="currentChange"
+      v-else
+    />
   </div>
 </template>
 
@@ -50,202 +57,141 @@
 import type { ReportInfo } from '@/components/Danger/const';
 import ReportList from '@/components/Danger/ReportList.vue';
 import { ArrowRight, DataLine, Search } from '@element-plus/icons-vue'
-import { reactive, ref, computed } from 'vue';
+import {ref, onMounted, watch, type Ref} from 'vue';
+import {
+  getVulnerabilityReportList,
+  getVulnerabilityReportSearch,
+  type VulnerabilityReportListResponse, type VulnerabilityReportSearchResponse
+} from "@/components/Danger/apis.ts";
+import LoadingFrames from "@/components/LoadingFrames.vue";
 
 const searchQuery = ref('')
 const selectedRiskLevel = ref('')
-const riskLevelOptions = ['CVE', 'Poc']
+const riskLevelOptions = ['Low', 'Medium', 'High']
 const selectedTime = ref('')
 
-const reports = reactive<ReportInfo[]>([
-  {
-    reportName: 'Apache HugeGraph-Server JWT 权限绕过漏洞（CVE-2024-43441）',
-    reportId: 'AVD-2024-43441	',
-    dangerType: ['CVE-302'],
-    time: '2024-12-24',
-    isCve: true,
-    isPoc: false,
-    ref: 'https://avd.aliyun.com',
-  },
-  {
-    reportName: 'Zabbix user.get API SQL 注入漏洞（CVE-2024-42327）',
-    reportId: 'AVD-202442327',
-    dangerType: ['CVE-306'],
-    time: '2024-10-01',
-    isCve: true,
-    isPoc: true,
-    ref: 'https://avd.aliyun.com',
-  },
-  {
-      reportName: 'Apache ShardingSphere-UI 任意文件上传漏洞（CVE-2024-42327）',
-      reportId: 'AVD-2024-42327',
-      dangerType: ['CVE-306'],
-      time: '2024-10-01',
-      isCve: true,
-      isPoc: true,
-      ref: 'https://avd.aliyun.com',
-  },
-  {
-    reportName: 'Spring Cloud Gateway RCE 漏洞（CVE-2024-43442）',
-    reportId: 'AVD-2024-43442',
-    dangerType: ['CVE-202'],
-    time: '2024-12-25',
-    isCve: true,
-    isPoc: true,
-    ref: 'https://avd.aliyun.com',
-    cvss: '9.8', // 新增 CVSS 评分
-    solution: '升级到最新版本，并参考官方补丁说明进行修复。' // 新增解决方案
-  },
-  {
-    reportName: 'Apache Druid SQL注入漏洞',
-    reportId: 'AVD-2024-43443',
-    dangerType: ['SQL注入'], // 自定义危险类型
-    time: '2024-12-26',
-    isCve: false, // 非 CVE 漏洞
-    isPoc: true,
-    ref: 'https://github.com/apache/druid/security',
-    attackVector: '网络', // 新增攻击向量
-  },
-  {
-    reportName: '某第三方组件XSS漏洞',
-    reportId: 'AVD-2024-43444',
-    dangerType: ['XSS'],
-    time: '2024-12-27',
-    isCve: false,
-    isPoc: false,
-    ref: 'https://nvd.nist.gov/vuln/detail/CVE-2024-43444',
-    affectedVersions: '1.0.0 - 2.3.5', // 新增受影响版本
-  },
-    {
-      "reportName": "Redis 未授权访问漏洞",
-      "reportId": "AVD-2024-43445",
-      "dangerType": ["未授权访问"],
-      "time": "2024-12-28",
-      "isCve": false,
-      "isPoc": true,
-      "ref": "https://github.com/redis/redis/security",
-      "attackVector": "本地"
-    },
-    {
-      "reportName": "PostgreSQL 数据库提升权限漏洞（CVE-2024-43446）",
-      "reportId": "AVD-2024-43446",
-      "dangerType": ["CVE-401"],
-      "time": "2024-12-29",
-      "isCve": true,
-      "isPoc": true,
-      "ref": "https://nvd.nist.gov/vuln/detail/CVE-2024-43446",
-      "cvss": "8.2",
-      "solution": "及时升级到官方推荐版本。"
-    },
-    {
-      "reportName": "NGINX 配置不当导致敏感信息泄露",
-      "reportId": "AVD-2024-43447",
-      "dangerType": ["配置不当"],
-      "time": "2024-12-30",
-      "isCve": false,
-      "isPoc": false,
-      "ref": "https://github.com/nginx/nginx/security",
-      "affectedVersions": "1.21.0 - 1.22.3"
-    },
-    {
-      "reportName": "Apache Log4j2 JNDI 注入漏洞（CVE-2024-43448）",
-      "reportId": "AVD-2024-43448",
-      "dangerType": ["CVE-405"],
-      "time": "2025-01-01",
-      "isCve": true,
-      "isPoc": true,
-      "ref": "https://avd.aliyun.com",
-      "cvss": "9.0",
-      "solution": "更新到安全版本 2.17.0 或更高版本。"
-    },
-    {
-      "reportName": "MySQL 用户权限绕过漏洞",
-      "reportId": "AVD-2024-43449",
-      "dangerType": ["权限绕过"],
-      "time": "2025-01-02",
-      "isCve": false,
-      "isPoc": true,
-      "ref": "https://github.com/mysql/mysql-server/security",
-      "attackVector": "网络"
-    },
-    {
-      "reportName": "Elasticsearch REST API XXE 漏洞（CVE-2024-43450）",
-      "reportId": "AVD-2024-43450",
-      "dangerType": ["CVE-403"],
-      "time": "2025-01-03",
-      "isCve": true,
-      "isPoc": true,
-      "ref": "https://nvd.nist.gov/vuln/detail/CVE-2024-43450",
-      "cvss": "7.5",
-      "solution": "禁用不必要的外部实体解析功能。"
-    },
-    {
-      "reportName": "Jenkins 插件反序列化漏洞",
-      "reportId": "AVD-2024-43451",
-      "dangerType": ["反序列化"],
-      "time": "2025-01-04",
-      "isCve": false,
-      "isPoc": false,
-      "ref": "https://github.com/jenkinsci/security-advisories"
-    },
-    {
-      "reportName": "Docker 容器逃逸漏洞（CVE-2024-43452）",
-      "reportId": "AVD-2024-43452",
-      "dangerType": ["CVE-402"],
-      "time": "2025-01-05",
-      "isCve": true,
-      "isPoc": true,
-      "ref": "https://avd.aliyun.com",
-      "cvss": "9.3",
-      "solution": "应用最新安全补丁并限制容器特权操作。"
-    },
-    {
-      "reportName": "Kubernetes API Server DoS 漏洞",
-      "reportId": "AVD-2024-43453",
-      "dangerType": ["拒绝服务"],
-      "time": "2025-01-06",
-      "isCve": false,
-      "isPoc": true,
-      "ref": "https://github.com/kubernetes/kubernetes/security",
-      "attackVector": "本地"
-    },
-    {
-      "reportName": "Grafana 未授权文件读取漏洞",
-      "reportId": "AVD-2024-43454",
-      "dangerType": ["未授权访问"],
-      "time": "2025-01-07",
-      "isCve": false,
-      "isPoc": false,
-      "ref": "https://github.com/grafana/grafana/security",
-      "affectedVersions": "8.0.0 - 8.3.2"
-    }
-])
+// const reports = reactive<ReportInfo[]>([]);
+//
+// const filteredReports = computed(() => {
+//   console.log(selectedTime.value)
+//   return reports.filter(report => {
+//     if(searchQuery.value!='' && !((report.reportName.toLowerCase().includes(searchQuery.value.toLowerCase())||report.reportId.toLowerCase().includes(searchQuery.value.toLowerCase())))){
+//       return false;
+//     }
+//     if(selectedRiskLevel.value=='CVE' && !report.isCve){
+//       return false;
+//     }
+//     if(selectedRiskLevel.value=='Poc' && !report.isPoc){
+//       return false;
+//     }
+//     if(selectedRiskLevel.value.length == 2 && !(report.isCve && report.isPoc)){
+//       return false;
+//     }
+//     if(selectedTime.value!=''){
+//       const [start, end] = selectedTime.value;
+//       const reportTime = new Date(report.time).getTime();
+//       if(reportTime < new Date(start).getTime() || reportTime > new Date(end).getTime()){
+//         return false;
+//       }
+//     }
+//     return true;
+//   })
+// })
 
-const filteredReports = computed(() => {
-  console.log(selectedTime.value)
-  return reports.filter(report => {
-    if(searchQuery.value!='' && !((report.reportName.toLowerCase().includes(searchQuery.value.toLowerCase())||report.reportId.toLowerCase().includes(searchQuery.value.toLowerCase())))){
-      return false;
+const reportList = ref<ReportInfo[]>([]);
+let currentPage = ref(1);
+let totalPages = ref(0);
+let totalItems = ref(0);
+
+// loading-frames
+const isLoading = ref(true);
+
+// report list
+function currentChange(page: number) {
+  currentPage.value = page;
+  getReports(page);
+}
+
+async function getReports(currentPage: number) {
+  isLoading.value = true;
+  const pageSize = 10;
+  reportList.value = [];
+  await getVulnerabilityReportList(currentPage, pageSize).then((res) => {
+    let data:VulnerabilityReportListResponse = res;
+    totalPages.value = data.obj.pages;
+    totalItems.value = data.obj.total;
+    for(let i=0; i<data.obj.records.length; i++) {
+        let report = data.obj.records[i];
+        reportList.value.push({
+          reportName: report.vulnerabilityName,
+          reportId: report.cveId,
+          time: report.disclosureTime,
+          riskLevel: report.riskLevel,
+          ref: report.referenceLink
+        });
     }
-    if(selectedRiskLevel.value=='CVE' && !report.isCve){
-      return false;
-    }
-    if(selectedRiskLevel.value=='Poc' && !report.isPoc){
-      return false;
-    }
-    if(selectedRiskLevel.value.length == 2 && !(report.isCve && report.isPoc)){
-      return false;
-    }
-    if(selectedTime.value!=''){
-      const [start, end] = selectedTime.value;
-      const reportTime = new Date(report.time).getTime();
-      if(reportTime < new Date(start).getTime() || reportTime > new Date(end).getTime()){
-        return false;
+    console.log(reportList.value);
+  });
+  isLoading.value = false;
+}
+
+// search
+const filteredReports = ref([])
+
+function debounce<T extends (...args: any[]) => Promise<void> | void>(
+  fn: T,
+  delay: number,
+  isLoadingRef: Ref<boolean>
+): T {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    isLoadingRef.value = true;
+    timeoutId = setTimeout(async () => {
+      try {
+        await fn.apply(this, args); // 等待异步操作完成
+      } finally {
+        isLoadingRef.value = false; // 无论如何都更新状态
       }
+    }, delay);
+  } as T;
+}
+
+async function searchReports(keyword: string) {
+  filteredReports.value = [];
+  isLoading.value = true;
+  await getVulnerabilityReportSearch(keyword).then((res) => {
+    let data:VulnerabilityReportSearchResponse = res;
+    for(let i=0; i<data.obj.length; i++) {
+        let report = data.obj[i];
+      filteredReports.value.push({
+          reportName: report.vulnerabilityName,
+          reportId: report.cveId,
+          time: report.disclosureTime,
+          riskLevel: report.riskLevel,
+          ref: report.referenceLink
+        });
     }
-    return true;
-  })
+    console.log(filteredReports.value);
+  });
+  isLoading.value = false;
+}
+const debouncedSearch = debounce(async (query: string) => {
+  if (query) {
+    await searchReports(query);
+  } else {
+    filteredReports.value = [];
+  }
+}, 500, isLoading); // 500ms debounce time
+
+watch(searchQuery, (newQuery) => {
+  debouncedSearch(newQuery);
+});
+
+onMounted(() => {
+  getReports(currentPage.value);
 })
+
 </script>
 
 <style scoped>
@@ -253,7 +199,6 @@ const filteredReports = computed(() => {
   container-name: reportsView;
   container-type: inline-size;
 }
-
 
 .bread {
   margin: 15px;
@@ -300,6 +245,11 @@ const filteredReports = computed(() => {
       min-width: fit-content;
     }
   }
+}
+
+.loading-frames{
+  margin-top: 20vh;
+
 }
 
 @container reportsView (max-width: 931px) {
