@@ -31,6 +31,7 @@ const errorHandle = (status: number, info: string) => {
 const instance = axios.create({
   // 这里放网络请求的公共配置
   timeout: 5000,
+  baseURL: 'http://localhost:8080', // 服务器地址，上线后需要修改
 })
 
 // 拦截器----发送数据之前
