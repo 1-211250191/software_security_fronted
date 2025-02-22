@@ -54,6 +54,7 @@ declare module 'vue' {
     LLMHelper: typeof import('./src/components/LLMHelper/LLMHelper.vue')['default']
     LLMHelperBody: typeof import('./src/components/LLMHelper/LLMHelperBody.vue')['default']
     LlmInfo: typeof import('./src/components/Optimize/LlmInfo.vue')['default']
+    LoadingFrames: typeof import('./src/components/LoadingFrames.vue')['default']
     PInfo: typeof import('./src/components/Project/PInfo.vue')['default']
     ProjectForm: typeof import('./src/components/Project/ProjectForm.vue')['default']
     ReportList: typeof import('./src/components/Danger/ReportList.vue')['default']
