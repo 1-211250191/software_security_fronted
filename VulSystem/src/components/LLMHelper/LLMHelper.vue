@@ -8,10 +8,10 @@ const helperVisible = ref(false)
 
 <template>
   <div class="llm-helper">
-    <div class="llm-helper-button" @click="helperVisible = !helperVisible" v-show="helperVisible">
+    <div class="llm-helper-button" @click="helperVisible = !helperVisible" v-show="!helperVisible">
         <el-icon size="24"><Orange /></el-icon>
     </div>
-    <div class="llm-helper-body" v-show="!helperVisible">
+    <div class="llm-helper-body" v-show="helperVisible">
       <LLMHelperBody @closeBody="helperVisible = !helperVisible"/>
     </div>
   </div>
