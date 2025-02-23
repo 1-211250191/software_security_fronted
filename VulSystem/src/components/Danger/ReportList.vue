@@ -40,7 +40,7 @@ const displayedPages = computed(() => {
 </script>
 
 <template>
-  <div class="danger-card" :class="classname">
+  <div class="danger-card">
     <ReportListTable v-if="searchQuery === ''" :paginated-list="paginatedList" :search-query="searchQuery" />
     <ReportListTable v-else :paginated-list="filteredReports" :search-query="searchQuery" />
 
