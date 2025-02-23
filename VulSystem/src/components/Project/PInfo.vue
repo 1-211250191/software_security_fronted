@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { ProjectStatus, type ProjectInfo } from './const';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
+import ProjectForm from "@/components/Project/ProjectForm.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -84,8 +85,14 @@ const handleEdit = (project: ProjectInfo) => {
       <div class="text">检测标准阈值: {{ project.widgt ?? 10 }}</div>
     </div>
   </div>
-  <ProjectForm type="edit" :visible="editFormVisible" @cancel="() => editFormVisible = false" @confirm="handleEdit"
-    :project="project" />
+  <ProjectForm
+    type="edit"
+    :visible="editFormVisible"
+    @cancel="() => editFormVisible = false"
+    @confirm="handleEdit"
+    @close="() => editFormVisible = false"
+    :project="project"
+  />
 </template>
 
 <style scoped>
