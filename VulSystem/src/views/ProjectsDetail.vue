@@ -13,7 +13,7 @@
     <!-- <v-chart ref="mychart1" class="chart"></v-chart> -->
     <DataCard title="漏洞分布" width="auto">
       <template #main>
-        <WChart width="100%" height="200px" :option="option"></WChart>
+        <WChart width="100%" height="200px" :option="option" ref="mychart"></WChart>
       </template>
     </DataCard>
     <DataCard title="项目基础信息">
@@ -84,28 +84,10 @@ const timeFormatter = (dateString: string) => {
   console.log(formattedDate); // 输出: "2025-02-13"
   return formattedDate
 }
-const projectInfo = ref<ProjectInfoDetail>({
-  "id": 1,
-  "projectName": "project1",
-  "createTime": "Fri Feb 14 17:11:38 CST 2025",
-  "projectDescription": "1",
-  "language": "java",
-  "riskThreshold": 10,
-  "highRiskNum": 1,
-  "lowRiskNum": 0,
-  "midRiskNum": 1,
-  "lastScanTime": "2025-02-14T06:00"
-});
-
-// onMounted(() => {
-//   api.getProjectDetail(props.projectId)
-//     .then(res => {
-//       projectInfo.value = res.data.obj
-//     })
-// })
-
-
-const option = {
+const projectInfo = ref<ProjectInfoDetail>();
+const dangerList = ref<DangerInfo[]>([])
+const mychart = ref()
+const option = ref({
   xAxis: {
     type: 'category',
     data: ['高', '中', '低'],
@@ -155,7 +137,70 @@ const option = {
       barWidth: 25
     }
   ]
-};
+});
+onMounted(() => {
+  api.getProjectDetail(props.projectId)
+    .then(res => {
+      projectInfo.value = res.data.obj
+      const newOptionSeries = {
+        data: [
+          {
+            value: projectInfo.value?.highRiskNum ?? 0,
+            label: {
+              position: 'top',
+              show: true
+            },
+            itemStyle: {
+              borderRadius: 5,
+              color: '#f63f3f'
+            },
+          },
+          {
+            value: projectInfo.value?.midRiskNum ?? 0,
+            label: {
+              position: 'top',
+              show: true
+            },
+            itemStyle: {
+              borderRadius: 5,
+              color: '#f5800c'
+            }
+          },
+          {
+            value: projectInfo.value?.lowRiskNum ?? 0,
+            label: {
+              show: true,
+              position: 'top',
+
+            },
+            itemStyle: {
+              borderRadius: 5,
+              color: '#fddb13'
+            }
+          },
+        ],
+        type: 'bar',
+        barWidth: 25
+      }
+
+      option.value = {
+        ...option.value,
+        series: [newOptionSeries],
+      };
+      // if (mychart.value) {
+      //   mychart.value.setData(option.value)
+      // }
+      console.log(option.value)
+
+    })
+  api.getVulList(props.projectId)
+    .then(res => {
+      dangerList.value = res.data.obj
+    })
+})
+
+
+
 interface Tree {
   id: number
   label: string
@@ -201,28 +246,7 @@ const data: Tree[] = [
   },
 
 ]
-const dangerList = reactive<DangerInfo[]>([
-  {
-    id: 1,
-    name: "err1",
-    description: "err1",
-    language: "java",
-    time: "Fri Feb 14 00:00:00 CST 2025",
-    riskLevel: "高风险",
-    isaccept: 0,
-    ref: ''
-  },
-  {
-    id: 2,
-    name: "err2",
-    description: "err2",
-    language: "java",
-    time: "Thu Feb 13 00:00:00 CST 2025",
-    riskLevel: "中风险",
-    isaccept: 0,
-    ref: ''
-  }
-])
+
 </script>
 
 <style scoped>

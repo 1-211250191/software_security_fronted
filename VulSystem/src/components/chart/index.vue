@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, getCurrentInstance, defineExpose, ref } from 'vue'
+import { onMounted, getCurrentInstance, defineExpose, ref, watch } from 'vue'
 
 defineOptions({
   name: 'WChart'
@@ -55,8 +55,8 @@ function init() {
   // 基于准备好的dom，初始化echarts实例
   const dom = wchart.value
   // 通过 internalInstance.appContext.config.globalProperties 获取全局属性或方法
-  let internalInstance = getCurrentInstance()
-  let echarts = internalInstance?.appContext.config.globalProperties.$echarts
+  const internalInstance = getCurrentInstance()
+  const echarts = internalInstance?.appContext.config.globalProperties.$echarts
 
   chart = echarts.init(dom, 'weizwz')
   // 渲染图表
@@ -70,6 +70,15 @@ function init() {
     if (props.initAfter) props.initAfter(chart)
   }
 }
+
+// 监视 option 的变化
+watch(() => props.option, (newOption) => {
+  if (chart) {
+    chart.setOption(newOption)
+    console.log('new Option')
+    console.log(newOption)
+  }
+})
 
 function resize() {
   chart.resize()
