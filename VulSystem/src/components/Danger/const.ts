@@ -21,6 +21,7 @@ export interface ReportInfo {
   time: string // 披露时间
   isCve: boolean
   isPoc: boolean
+  riskLevel: string; // 风险等级
   ref: string //漏洞来源
 }
 

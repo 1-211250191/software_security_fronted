@@ -13,7 +13,7 @@
     <el-container>
       <!-- 侧边栏 -->
       <el-aside width='200px' v-if="!isLoginPage" style="padding: 20px 0;position: fixed;">
-        <el-menu router="true" :default-active="defaultIndex">
+        <el-menu :router="true" :default-active="defaultIndex">
           <el-sub-menu index="/projects">
             <template #title>
               <el-icon>

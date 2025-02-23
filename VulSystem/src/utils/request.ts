@@ -32,6 +32,7 @@ const instance = axios.create({
   // 这里放网络请求的公共配置
   baseURL: 'http://localhost:8080', // 设置基础 URL
   timeout: 5000,
+  baseURL: 'http://localhost:8080', // 服务器地址，上线后需要修改
 })
 
 // 拦截器----发送数据之前
@@ -39,9 +40,10 @@ instance.interceptors.request.use(
   (config) => {
     // 拦截器成功函数
 
-    if (config.method == 'post') {
-      config.data = querystring.stringify(config.data)
-    }
+    // 暂时不可这样做，原因：formData 中含有文件，querystring.stringify 会将文件转为字符串
+    // if (config.method == 'post') {
+    //   config.data = querystring.stringify(config.data)
+    // }
 
     // config:包含着网络请求的所有信息
     return config

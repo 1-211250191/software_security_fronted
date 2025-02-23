@@ -20,8 +20,8 @@ const props = defineProps({
 
 const highlightedText = computed(() => {
   if (!props.highlight) return props.text;
-  const regex = new RegExp(`(${props.highlight})`, 'gi');
-  return props.text.replace(regex, '<span class="highlight bounce-animation">$1</span>');
+  // we might not use regex here, it would fail when inputting 'xxx)' or 'xxx('.
+  return props.text.replace(props.highlight, `<span class="highlight bounce-animation">${props.highlight}</span>`);
 })
 
 watch(() => props.highlight, () => {
