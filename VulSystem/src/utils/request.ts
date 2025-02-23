@@ -39,9 +39,10 @@ instance.interceptors.request.use(
   (config) => {
     // 拦截器成功函数
 
-    if (config.method == 'post') {
-      config.data = querystring.stringify(config.data)
-    }
+    // 暂时不可这样做，原因：formData 中含有文件，querystring.stringify 会将文件转为字符串
+    // if (config.method == 'post') {
+    //   config.data = querystring.stringify(config.data)
+    // }
 
     // config:包含着网络请求的所有信息
     return config
