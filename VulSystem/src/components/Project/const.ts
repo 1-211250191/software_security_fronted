@@ -25,6 +25,18 @@ export interface ProjectInfo {
    * 项目风险等级，高风险/低风险/暂无风险
    */
   risk_level: string
+  /**
+    * 项目语言
+    */
+  language: string
+  /**
+    * 公司名
+    */
+  company: string
+  /**
+   * 文件
+   */
+  file: object
 }
 
 export interface ProjectInfoDetail {
