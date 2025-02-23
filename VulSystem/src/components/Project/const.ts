@@ -6,10 +6,10 @@ export enum ProjectStatus {
 }
 
 export interface ProjectInfo {
-  // index: number
+  index: number
   // title: string
   // desc: string
-  // pStatus: ProjectStatus
+  pStatus: ProjectStatus
   // danger?: number
   // widgt?: number
 
@@ -25,6 +25,10 @@ export interface ProjectInfo {
    * 项目风险等级，高风险/低风险/暂无风险
    */
   risk_level: string
+  /**
+   * 项目风险阈值
+   */
+  risk_threshold: number
   /**
     * 项目语言
     */

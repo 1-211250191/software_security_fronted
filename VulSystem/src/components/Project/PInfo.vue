@@ -61,18 +61,18 @@ const handleEdit = (project: ProjectInfo) => {
   <div class="project-card" :class="classname">
     <div class="card-header">
       <div class="left">
-        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.title}` });">{{ project.title }}
+        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.title}` });">{{ project.name }}
         </h2>
-        <el-text truncated type="info" size="small">{{ project.desc }}</el-text>
+        <el-text truncated type="info" size="small">{{ project.description }}</el-text>
       </div>
       <div class="right">
         <div class="tag" :style="{ backgroundColor: statusTag.bgc, color: statusTag.color }"
-          @click="$router.push({ path: `/projects/info/${project.title}` });">{{ statusTag.text }}
+          @click="$router.push({ path: `/projects/info/${project.name}` });">{{ statusTag.text }}
         </div>
         <el-icon v-show="canEdit" class="project-icon" @click="editFormVisible = true">
           <Edit />
         </el-icon>
-        <el-icon v-show="canEdit" class="project-icon" @click="emit('delete', project.index)">
+        <el-icon v-show="canEdit" class="project-icon" @click="emit('delete', project)">
           <Delete />
         </el-icon>
         <el-icon class="project-icon" @click="handleOpen">

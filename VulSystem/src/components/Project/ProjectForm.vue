@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
+import {onMounted, reactive, ref, watch} from 'vue';
 import { ProjectStatus, type ProjectInfo } from './const';
 import {Lock, QuestionFilled} from "@element-plus/icons-vue";
 import LanguageSelector from "@/components/Project/LanguageSelector.vue";
@@ -38,6 +38,9 @@ const rules = {
   ],
   file: [
     { required: true, message: '请上传项目文件', trigger: 'change' }
+  ],
+  risk_threshold: [
+    { required: true, message: '请输入风险阈值', trigger: 'blur' }
   ]
 }
 
@@ -97,18 +100,18 @@ watch(() => props.project, (project) => {
       <el-form-item label="项目描述">
         <el-input v-model="newProject.description" type="textarea" placeholder="请输入项目描述"/>
       </el-form-item>
-      <el-form-item label="风险阈值" prop="risk_level">
-        <el-input-number v-model="newProject.risk_level" :min="0" :max="20" />
+      <el-form-item label="风险阈值" prop="risk_threshold">
+        <el-input-number v-model="newProject.risk_threshold" :min="0" :max="20"/>
         <div class="tips">
           <el-tooltip content="风险阈值是指项目中漏洞数量超过多少时，项目状态会变为风险状态。<br>当风险阈值为零时，代表高风险风险阈值。" raw-content placement="top">
             <el-icon class="question-icon"><QuestionFilled /></el-icon>
           </el-tooltip>
         </div>
       </el-form-item>
-      <el-form-item label="项目语言">
+      <el-form-item label="项目语言" v-if="type=='add'">
         <LanguageSelector @select="handleChangeLanguage"/>
       </el-form-item>
-      <el-form-item label="项目文件" prop="file">
+      <el-form-item label="项目文件" prop="file" v-if="type=='add'">
         <div class="upload-file-container">
           <el-upload
             ref="uploader"

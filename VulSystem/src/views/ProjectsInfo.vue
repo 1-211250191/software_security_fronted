@@ -79,10 +79,15 @@ import DataCard from '@/components/DataCard.vue';
 import WChart from '@/components/chart/index.vue'
 import PInfo from '@/components/Project/PInfo.vue';
 import { ProjectStatus, type ProjectInfo } from '@/components/Project/const';
-import { reactive, ref } from 'vue';
+import {onMounted, reactive, ref} from 'vue';
 import ProjectForm from '@/components/Project/ProjectForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import {createProject, type ProjectCreateResponse} from "@/components/Project/apis.ts";
+import {
+  createProject, deleteProject,
+  getProjectList,
+  type ProjectCreateResponse,
+  type ProjectListResponse, updateProject
+} from "@/components/Project/apis.ts";
 
 const option = {
   tooltip: {
@@ -180,7 +185,7 @@ const handleAddProject = (newProject: ProjectInfo) => {
   const formData = new FormData();
   formData.append('name', newProject.name);
   formData.append('description', newProject.description);
-  formData.append('risk_threshold', newProject.risk_level);
+  formData.append('risk_threshold', newProject.risk_threshold);
   formData.append('language', newProject.language);
   formData.append('companyName', newProject.company)
   formData.append('file', newProject.file);
@@ -204,62 +209,115 @@ const handleAddProject = (newProject: ProjectInfo) => {
 }
 
 const handleEditProject = (project: ProjectInfo) => {
-  const pos = projectInfos.findIndex(item => item.index === project.index);
-  if (pos != -1 && pos < projectInfos.length) {
-    projectInfos[pos] = project;
-  }
+  console.log(project);
+
+  const formData = new FormData();
+  formData.append('name', project.name);
+  formData.append('description',project.description);
+  formData.append('risk_threshold', project.risk_threshold);
+  formData.append('id', project.index);
+
+  updateProject(formData).then((res: ProjectCreateResponse) => {
+    console.log(res);
+    if(res.code === 200){
+      ElMessage({
+        message: '成功更新',
+        type: 'success',
+      })
+    }else{
+      ElMessage({
+        message: '更新失败: ' + res.message + ' ' + res.obj,
+        type: 'error',
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+    ElMessage.error('更新失败');
+  });
 }
 
-const handleDeleteProject = (index: number) => {
+const handleDeleteProject = (project: ProjectInfo) => {
   ElMessageBox.confirm('您确定要删除该项目吗?', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
   })
     .then(() => {
-      const pos = projectInfos.findIndex(item => item.index === index);
-      if (pos != -1 && pos < projectInfos.length) {
-        projectInfos.splice(pos, 1);
-        ElMessage({
-          message: '成功删除',
-          type: 'success',
-        })
-      }
+      console.log(project);
+      let formData = new FormData();
+      formData.append('id', project.index);
+
+      deleteProject(formData).then((res: ProjectCreateResponse) => {
+        console.log(res);
+        if(res.code === 200){
+          ElMessage({
+            message: '成功删除',
+            type: 'success',
+          })
+        }else{
+          ElMessage({
+            message: '删除失败: ' + res.message + ' ' + res.obj,
+            type: 'error',
+          })
+        }
+      }).catch((err) => {
+        console.log(err);
+        ElMessage.error('删除失败');
+      });
     })
     .catch(() => {
-      // catch error
+
     })
 }
 
-const projectInfos = reactive<ProjectInfo[]>([
-  {
-    index: 0,
-    title: '仓库名1',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.HIGH,
-    widgt: 10,
-  },
-  {
-    index: 1,
-    title: '仓库名2',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.LOW,
-    widgt: 8,
-  },
-  {
-    index: 2,
-    title: '仓库名3',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.ING,
-    widgt: 10,
-  },
-  {
-    index: 3,
-    title: '仓库名4',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.SAFE,
-    widgt: 10,
-  },
-]);
+// loading-frames
+const isLoading = ref(true);
+
+
+// project list
+const projectInfos = reactive<ProjectInfo[]>([]);
+
+async function getProjects(companyId: number){
+  isLoading.value = true;
+  const page = 1;
+  const pageSize = 10;
+
+  projectInfos.value = [];
+  await getProjectList(page, pageSize, companyId).then((res) => {
+    let data: ProjectListResponse = res;
+    if(data.code !== 200) {
+      ElMessage.error('获取项目列表失败');
+      console.error(data);
+      return;
+    }
+    for (let i = 0; i < data.obj.length; i++) {
+      let pStatus: ProjectStatus = ProjectStatus.SAFE;
+      if(data.obj[i].risk_level === '高风险'){
+        pStatus = ProjectStatus.HIGH;
+      }else if(data.obj[i].risk_level === '中风险'){
+        pStatus = ProjectStatus.ING;
+      }else{
+        pStatus = ProjectStatus.LOW;
+      }
+      projectInfos.push({
+        index: data.obj[i].id,
+        name: data.obj[i].name,
+        description: data.obj[i].description,
+        risk_level: data.obj[i].risk_level,
+        pStatus: pStatus
+      });
+    }
+  }).catch((err) => {
+    console.log(err);
+    ElMessage.error('获取项目列表失败');
+  });
+
+  isLoading.value = false;
+}
+
+onMounted(() => {
+  const companyId = 1; // mock data, should be replaced by real data
+  getProjects(companyId);
+})
 </script>
 
 <style scoped>
