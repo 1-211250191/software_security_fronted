@@ -57,8 +57,13 @@
         @click="addFormVisible = true;">新建项目</el-button>
     </template>
     <template #main>
-      <PInfo v-for="info in projectInfos" :key="info.index" :project="info" @delete="handleDeleteProject"
-        @edit="handleEditProject" />
+      <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
+        <LoadingFrames size="large"></LoadingFrames>
+      </div>
+      <div v-else>
+        <PInfo v-for="info in projectInfos" :key="info.index" :project="info" @delete="handleDeleteProject"
+               @edit="handleEditProject" />
+      </div>
     </template>
   </DataCard>
 
@@ -88,6 +93,7 @@ import {
   type ProjectCreateResponse,
   type ProjectListResponse, updateProject
 } from "@/components/Project/apis.ts";
+import LoadingFrames from "@/components/LoadingFrames.vue";
 
 const option = {
   tooltip: {
