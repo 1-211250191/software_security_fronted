@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 // 使用 defineEmits 声明可以发出的事件
-const emit = defineEmits(['update:modelValue', 'update:isEdit']);
+const emit = defineEmits(['update:modelValue']);
 
 // 使用 toRefs 将响应式对象属性解构成响应式引用
 const isEdit = ref<boolean>(false);
@@ -35,6 +35,11 @@ function confirmEdit() {
   isEdit.value = false
 }
 
+function cancelEdit() {
+  isEdit.value = false
+  localValue.value = props.modelValue
+}
+
 </script>
 
 <template>
@@ -47,7 +52,7 @@ function confirmEdit() {
       </div>
       <div class="text">
         <span class="edit" @click="confirmEdit">确认修改</span>
-        <span class="cancel" @click="isEdit = false">取消</span>
+        <span class="cancel" @click="cancelEdit">取消</span>
       </div>
     </template>
     <template v-else>
@@ -81,7 +86,11 @@ function confirmEdit() {
 
     .input {
       flex: 1;
-      max-width: 50%;
+      max-width: 40%;
+    }
+
+    .el-input-number {
+      max-width: 100px;
     }
 
     .text {
@@ -90,7 +99,7 @@ function confirmEdit() {
 
       .edit {
         color: #336FFF;
-        margin: 0 20px;
+        margin: 0 10px;
       }
 
       .cancel {

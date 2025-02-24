@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import type { LlmInfoType } from './const';
+import { api } from '@/views/service';
 
 const props = withDefaults(
   defineProps<{
@@ -15,9 +16,9 @@ const props = withDefaults(
   }
 );
 
-const chooseLLM = () => {
+const emit = defineEmits(['update:name'])
 
-}
+
 </script>
 
 <template>
@@ -26,7 +27,7 @@ const chooseLLM = () => {
       <h4>{{ info.llmName }}</h4>
       <div class="right">
         <div v-if="info.infoTag" class="tag" :style="{ backgroundColor: '#E4FBE5', color: '#3EC01E' }">{{ info.infoTag
-          }}
+        }}
         </div>
         <div v-if="info.needVip" class="tag" :style="{ backgroundColor: '#FFF5EB', color: '#FE8B00' }">会员专享</div>
         <el-tag v-if="isChosen" type="primary">已选择</el-tag>
@@ -45,7 +46,8 @@ const chooseLLM = () => {
           <div class="data">误报率: {{ info.falseRate }}</div>
         </div>
       </div>
-      <el-button class="llm-button" v-if="!info.needVip || (info.needVip && isVip)" type="primary" @click="chooseLLM">
+      <el-button class="llm-button" v-if="!info.needVip || (info.needVip && isVip)" type="primary"
+        @click="emit('update:name', info.llmName)">
         选用该模型
       </el-button>
       <div class="no-vip" v-if="info.needVip && !isVip">非会员无法使用</div>
