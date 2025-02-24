@@ -30,7 +30,6 @@ const errorHandle = (status: number, info: string) => {
 // 1.创建网络请求对象
 const instance = axios.create({
   // 这里放网络请求的公共配置
-  baseURL: 'http://localhost:8080', // 设置基础 URL
   timeout: 5000,
   baseURL: 'http://localhost:8080', // 服务器地址，上线后需要修改
 })
