@@ -19,7 +19,7 @@
     <DataCard title="项目统计">
       <template #main>
         <div class="static">
-          <el-statistic :value="60" :value-style="{ fontSize: '36px', color: '#336fff' }">
+          <el-statistic :value="3" :value-style="{ fontSize: '36px', color: '#336fff' }">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 <el-icon style="margin-right: 4px" :size="14">
@@ -29,7 +29,7 @@
               </div>
             </template>
           </el-statistic>
-          <el-statistic :value="30" :value-style="{ fontSize: '36px', color: '#336fff' }">
+          <el-statistic :value="2" :value-style="{ fontSize: '36px', color: '#336fff' }">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 <el-icon style="margin-right: 4px" :size="14">
@@ -53,8 +53,7 @@
           </el-icon>
         </template>
       </el-input>
-      <el-button type="primary" color="#336fff"
-        @click="addFormVisible = true;">新建项目</el-button>
+      <el-button type="primary" color="#336fff" @click="addFormVisible = true;">新建项目</el-button>
     </template>
     <template #main>
       <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
@@ -62,18 +61,13 @@
       </div>
       <div v-else>
         <PInfo v-for="info in projectInfos" :key="info.index" :project="info" @delete="handleDeleteProject"
-               @edit="handleEditProject" />
+          @edit="handleEditProject" />
       </div>
     </template>
   </DataCard>
 
-  <ProjectForm
-    type="add"
-    :visible="addFormVisible"
-    @cancel="() => addFormVisible = false"
-    @confirm="handleAddProject"
-    @close="() => addFormVisible = false"
-  />
+  <ProjectForm type="add" :visible="addFormVisible" @cancel="() => addFormVisible = false" @confirm="handleAddProject"
+    @close="() => addFormVisible = false" />
 
 
 </template>
@@ -83,8 +77,8 @@ import { ArrowRight, Tickets, Reading, Search, DocumentCopy } from '@element-plu
 import DataCard from '@/components/DataCard.vue';
 import WChart from '@/components/chart/index.vue'
 import PInfo from '@/components/Project/PInfo.vue';
-import { ProjectStatus, type ProjectInfo } from '@/components/Project/const';
-import {onMounted, reactive, ref} from 'vue';
+import { type ProjectInfo } from '@/components/Project/const';
+import { onMounted, reactive, ref } from 'vue';
 import ProjectForm from '@/components/Project/ProjectForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
@@ -137,7 +131,7 @@ const option = {
       emphasis: {
         focus: 'series'
       },
-      data: [20],
+      data: [2],
       itemStyle: {
         borderRadius: 5,
         // color: '#EE6666' // 设置颜色
@@ -155,31 +149,31 @@ const option = {
       emphasis: {
         focus: 'series'
       },
-      data: [10],
+      data: [1],
       itemStyle: {
         borderRadius: 5, // Add rounded corners
         // color: '#fac858'
         color: '#e3ebff',
       }
     },
-    {
-      name: '暂无风险',
-      type: 'bar',
-      stack: 'total',
-      label: {
-        show: true
-      },
-      emphasis: {
-        focus: 'series'
-      },
-      data: [30],
-      itemStyle: {
-        borderRadius: 5, // Add rounded corners
-        // color: '#91cc75'
-        color: '#336fff',
-      },
-      barCategoryGap: '30%', // 设置柱状图之间的间隔
-    },
+    // {
+    //   name: '暂无风险',
+    //   type: 'bar',
+    //   stack: 'total',
+    //   label: {
+    //     show: true
+    //   },
+    //   emphasis: {
+    //     focus: 'series'
+    //   },
+    //   data: [0],
+    //   itemStyle: {
+    //     borderRadius: 5, // Add rounded corners
+    //     // color: '#91cc75'
+    //     color: '#336fff',
+    //   },
+    //   barCategoryGap: '30%', // 设置柱状图之间的间隔
+    // },
 
   ]
 };
@@ -198,12 +192,12 @@ const handleAddProject = (newProject: ProjectInfo) => {
 
   createProject(formData).then((res: ProjectCreateResponse) => {
     console.log(res);
-    if(res.code === 200){
+    if (res.code === 200) {
       ElMessage({
         message: '成功添加',
         type: 'success',
       })
-    }else{
+    } else {
       ElMessage({
         message: '添加失败: ' + res.message + ' ' + res.obj,
         type: 'error',
@@ -219,18 +213,18 @@ const handleEditProject = (project: ProjectInfo) => {
 
   const formData = new FormData();
   formData.append('name', project.name);
-  formData.append('description',project.description);
+  formData.append('description', project.description);
   formData.append('risk_threshold', project.risk_threshold);
   formData.append('id', project.index);
 
   updateProject(formData).then((res: ProjectCreateResponse) => {
     console.log(res);
-    if(res.code === 200){
+    if (res.code === 200) {
       ElMessage({
         message: '成功更新',
         type: 'success',
       })
-    }else{
+    } else {
       ElMessage({
         message: '更新失败: ' + res.message + ' ' + res.obj,
         type: 'error',
@@ -254,12 +248,12 @@ const handleDeleteProject = (project: ProjectInfo) => {
 
       deleteProject(formData).then((res: ProjectCreateResponse) => {
         console.log(res);
-        if(res.code === 200){
+        if (res.code === 200) {
           ElMessage({
             message: '成功删除',
             type: 'success',
           })
-        }else{
+        } else {
           ElMessage({
             message: '删除失败: ' + res.message + ' ' + res.obj,
             type: 'error',
@@ -282,7 +276,7 @@ const isLoading = ref(true);
 // project list
 const projectInfos = reactive<ProjectInfo[]>([]);
 
-async function getProjects(companyId: number){
+async function getProjects(companyId: number) {
   isLoading.value = true;
   const page = 1;
   const pageSize = 10;
@@ -290,26 +284,26 @@ async function getProjects(companyId: number){
   projectInfos.value = [];
   await getProjectList(page, pageSize, companyId).then((res) => {
     let data: ProjectListResponse = res;
-    if(data.code !== 200) {
+    if (data.code !== 200) {
       ElMessage.error('获取项目列表失败');
       console.error(data);
       return;
     }
     for (let i = 0; i < data.obj.length; i++) {
-      let pStatus: ProjectStatus = ProjectStatus.SAFE;
-      if(data.obj[i].risk_level === '高风险'){
-        pStatus = ProjectStatus.HIGH;
-      }else if(data.obj[i].risk_level === '中风险'){
-        pStatus = ProjectStatus.ING;
-      }else{
-        pStatus = ProjectStatus.LOW;
-      }
+      // let pStatus: ProjectStatus = ProjectStatus.SAFE;
+      // if(data.obj[i].risk_level === '高风险'){
+      //   pStatus = ProjectStatus.HIGH;
+      // }else if(data.obj[i].risk_level === '中风险'){
+      //   pStatus = ProjectStatus.ING;
+      // }else{
+      //   pStatus = ProjectStatus.LOW;
+      // }
       projectInfos.push({
         index: data.obj[i].id,
         name: data.obj[i].name,
         description: data.obj[i].description,
         risk_level: data.obj[i].risk_level,
-        pStatus: pStatus
+        // pStatus: pStatus
       });
     }
   }).catch((err) => {

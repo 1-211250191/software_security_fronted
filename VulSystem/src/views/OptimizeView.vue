@@ -42,54 +42,71 @@ import { ElMessage } from 'element-plus';
 // const chosenLlmName = ref<string>('VulLibMiner')
 const llmList = reactive<LlmInfoType[]>([
   {
-    llmName: 'VulLibMiner',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner2',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner3',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    needVip: true,
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner4',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner5',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner6',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    infoTag: '准确率较高',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner7',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner8',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    infoTag: '误报率较低',
-    accuracy: 0.7,
-    falseRate: 0.02
-  }, {
-    llmName: 'VulLibMiner9',
-    desc: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    accuracy: 0.7,
-    falseRate: 0.02
+    llmName: 'TinyModel',
+    desc: '利用tf-idf打分算法结合基于bert的TinyModel方法进行检测，能够高效识别常见漏洞。',
+    accuracy: 0.75,
+    falseRate: 0.03
   },
+  {
+    llmName: 'LLM',
+    desc: '在TinyModel的识别基础上，使用大型语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
+    accuracy: 0.85,
+    falseRate: 0.01
+  },
+  {
+    llmName: 'LLM-lev',
+    desc: '在LLM基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.90,
+    falseRate: 0.015,
+  },
+  {
+    llmName: 'TinyModel-lev',
+    desc: '在TinyModel基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.82,
+    falseRate: 0.025
+  },
+  {
+    llmName: 'LLM-cos',
+    desc: '在LLM基础上结合余弦相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.88,
+    falseRate: 0.018,
+    infoTag: '误报率较低',
+  },
+  {
+    llmName: 'TinyModel-cos',
+    desc: '在TinyModel基础上结合余弦相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.80,
+    falseRate: 0.02,
+    infoTag: '误报率较低',
+  },
+  {
+    llmName: 'LLM-lcs',
+    desc: '在LLM基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.87,
+    falseRate: 0.017
+  },
+  {
+    llmName: 'TinyModel-lcs',
+    desc: '在TinyModel基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
+    accuracy: 0.79,
+    falseRate: 0.022
+  },
+  {
+    llmName: 'LLM-whiteList',
+    desc: '定制化训练的大模型，基于您的企业白名单进行训练，确保高准确率。',
+    accuracy: 0.92,
+    falseRate: 0.01,
+    infoTag: '准确率较高',
+    needVip: true,
+  },
+  {
+    llmName: 'TinyModel-whiteList',
+    desc: '定制化训练的bert模型，基于您的企业白名单进行训练，确保高准确率。',
+    accuracy: 0.83,
+    falseRate: 0.02,
+    infoTag: '准确率较高',
+    needVip: true,
+  }
 ])
 // 定义响应式变量
 // const threshold = ref<number>(0.5);
@@ -183,6 +200,7 @@ const changeStratage = () => {
 }
 
 .llm-list {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   /* 每行放 3 个卡片 */

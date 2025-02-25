@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import type { LlmInfoType } from './const';
-import { api } from '@/views/service';
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     info: LlmInfoType
     isChosen: boolean
@@ -34,17 +31,17 @@ const emit = defineEmits(['update:name'])
       </div>
 
     </div>
-    <el-text class="text" truncated type="info" line-clamp="3">{{ info.desc }}</el-text>
+    <div class="text">{{ info.desc }}</div>
     <div class="footer">
       <div class="data-info">
-        <div class="data-block">
+        <!-- <div class="data-block">
           <div class="pointer" :style="{ backgroundColor: '#87AE6C' }"></div>
           <div class="data">准确率: {{ info.accuracy }}</div>
-        </div>
-        <div class="data-block">
+        </div> -->
+        <!-- <div class="data-block">
           <div class="pointer" :style="{ backgroundColor: '#F9C55E' }"></div>
           <div class="data">误报率: {{ info.falseRate }}</div>
-        </div>
+        </div> -->
       </div>
       <el-button class="llm-button" v-if="!info.needVip || (info.needVip && isVip)" type="primary"
         @click="emit('update:name', info.llmName)">
@@ -87,6 +84,19 @@ const emit = defineEmits(['update:name'])
   .text {
     flex: 1;
     width: 100%;
+    font-size: 14px;
+    color: #555557;
+    display: -webkit-box;
+    /* 为了使用 WebKit 的剪裁 */
+    -webkit-box-orient: vertical;
+    /* 设置方向为垂直 */
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    /* 设置显示的行数 */
+    overflow: hidden;
+    /* 隐藏超出内容 */
+    text-overflow: ellipsis;
+    /* 显示省略号 */
   }
 
   .footer {
@@ -110,7 +120,7 @@ const emit = defineEmits(['update:name'])
       }
 
       .data {
-        font-size: 10px;
+        font-size: 12px;
       }
     }
 

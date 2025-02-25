@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import type { DangerInfo } from './const';
+import AdviceCard from './AdviceCard.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -56,6 +57,7 @@ watch(() => props.info.isaccept, (newValue) => {
   localAccept.value = newValue;
 });
 
+const dialogVisible = ref<boolean>(false)
 // 采纳漏洞
 const acceptVul = () => {
 }
@@ -85,7 +87,7 @@ const timeFormatter = (dateString: string) => {
         <h4>{{ info.name }}</h4>
         <div class="link"></div>
       </div>
-      <el-button v-if="localAccept" type="primary" plain>查看修复建议</el-button>
+      <el-button v-if="localAccept" type="primary" plain @click="dialogVisible = true">查看修复建议</el-button>
 
     </div>
     <el-text class="text" truncated type="info" line-clamp="2">{{ info.description }}</el-text>
@@ -107,6 +109,18 @@ const timeFormatter = (dateString: string) => {
       </div>
     </div>
   </div>
+  <el-dialog v-model="dialogVisible" title="" width="70%">
+    <!-- <span>This is a message</span> -->
+    <AdviceCard :info="info" />
+    <!-- <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="dialogVisible = false">
+          Confirm
+        </el-button>
+      </div>
+    </template> -->
+  </el-dialog>
 
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ProjectStatus, type ProjectInfo } from './const';
+import { type ProjectInfo } from './const';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import ProjectForm from "@/components/Project/ProjectForm.vue";
 
@@ -17,32 +17,35 @@ const props = withDefaults(
 const emit = defineEmits(['edit', 'delete']);
 
 type Tags = {
-  [key in ProjectStatus]: { color: string, bgc: string, text: string };
+  [key: string]: { color: string, bgc: string, text: string };
 };
 const statusTag = computed(() => {
   const tags: Tags = {
-    [ProjectStatus.HIGH]: {
+    ['高风险']: {
       color: '#FF5340',
       bgc: '#FFF4F1',
-      text: '高危 ' + (props.project.danger ?? 0)
+      // text: '高危 ' + (props.project.danger ?? 0)
+      text: '高风险'
     },
-    [ProjectStatus.ING]: {
+    ['低风险']: {
       color: '#336FFF',
       bgc: '#E5EFFF',
-      text: '分析中'
+      // text: '分析中'
+      text: '低风险'
     },
-    [ProjectStatus.LOW]: {
+    ['中风险']: {
       color: '#FE8B00',
       bgc: '#FFF5EB',
-      text: '中危 ' + (props.project.danger ?? 0)
+      text: '中风险'
+      // text: '中危 ' + (props.project.danger ?? 0)
     },
-    [ProjectStatus.SAFE]: {
+    ['暂无风险']: {
       color: '#3EC01E',
       bgc: '#E4FBE5',
-      text: '暂无漏洞'
+      text: '暂无风险'
     }
   }
-  return tags[props.project.pStatus]
+  return tags[props.project.risk_level]
 })
 
 const isOpen = ref(false)
@@ -61,9 +64,10 @@ const handleEdit = (project: ProjectInfo) => {
   <div class="project-card" :class="classname">
     <div class="card-header">
       <div class="left">
-        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.title}` });">{{ project.name }}
+        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.index}` });">{{ project.name }}
         </h2>
-        <el-text truncated type="info" size="small">{{ project.description }}</el-text>
+        <div class="text">{{ project.description }}</div>
+        <!-- <el-text truncated type="info" size="small"></el-text> -->
       </div>
       <div class="right">
         <div class="tag" :style="{ backgroundColor: statusTag.bgc, color: statusTag.color }"
@@ -82,17 +86,11 @@ const handleEdit = (project: ProjectInfo) => {
       </div>
     </div>
     <div class="detail" v-if="isOpen">
-      <div class="text">检测标准阈值: {{ project.widgt ?? 10 }}</div>
+      <div class="text">检测标准阈值: {{ project.risk_threshold ?? 10 }}</div>
     </div>
   </div>
-  <ProjectForm
-    type="edit"
-    :visible="editFormVisible"
-    @cancel="() => editFormVisible = false"
-    @confirm="handleEdit"
-    @close="() => editFormVisible = false"
-    :project="project"
-  />
+  <ProjectForm type="edit" :visible="editFormVisible" @cancel="() => editFormVisible = false" @confirm="handleEdit"
+    @close="() => editFormVisible = false" :project="project" />
 </template>
 
 <style scoped>
@@ -117,6 +115,24 @@ const handleEdit = (project: ProjectInfo) => {
       font-size: 15px;
       /* margin-bottom: 10px; */
       cursor: pointer;
+    }
+
+    .text {
+      flex: 1;
+      width: 100%;
+      font-size: 12px;
+      color: #999999;
+      display: -webkit-box;
+      /* 为了使用 WebKit 的剪裁 */
+      -webkit-box-orient: vertical;
+      /* 设置方向为垂直 */
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      /* 设置显示的行数 */
+      overflow: hidden;
+      /* 隐藏超出内容 */
+      text-overflow: ellipsis;
+      /* 显示省略号 */
     }
   }
 

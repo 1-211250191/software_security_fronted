@@ -35,7 +35,7 @@
                 </div>
               </template>
             </el-statistic>
-            <el-statistic :value="30" :value-style="{ fontSize: '36px', color: '#336fff' }">
+            <el-statistic :value="5" :value-style="{ fontSize: '36px', color: '#336fff' }">
               <template #title>
                 <div style="display: inline-flex; align-items: center">
                   <el-icon style="margin-right: 4px" :size="14">
@@ -64,7 +64,7 @@ import { ArrowRight, Tickets, Reading, DocumentCopy } from '@element-plus/icons-
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
 import PInfo from '@/components/Project/PInfo.vue';
-import { ProjectStatus, type ProjectInfo, type ProjectInfoDetail } from '@/components/Project/const';
+import { type ProjectInfo, type ProjectInfoDetail } from '@/components/Project/const';
 import { reactive } from 'vue';
 defineProps<{
   project: string
@@ -72,40 +72,23 @@ defineProps<{
 
 const dangerProjectInfos = reactive<ProjectInfo[]>([
   {
-    index: 0,
-    title: '仓库名1',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.HIGH,
-    widgt: 10,
-  },
-  // {
-  //   index: 19,
-  //   title: '仓库名20',
-  //   desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-  //   pStatus: ProjectStatus.HIGH,
-  //   widgt: 10,
-  // },
-  // {
-  //   index: 6,
-  //   title: '仓库名7',
-  //   desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-  //   pStatus: ProjectStatus.HIGH,
-  //   widgt: 10,
-  // },
-  {
-    index: 1,
-    title: '仓库名2',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.LOW,
-    widgt: 8,
+    "risk_level": "低风险",
+    "name": "Google Guava",
+    "description": "Guava是Google开发的Java库，提供了许多实用的工具类和功能。其仓库位于GitHub，是Java开发中常用的工具库‌",
+    "id": "1"
   },
   {
-    index: 9,
-    title: '仓库名10',
-    desc: '仓库描述xxxxxxxxxxxxxxxxxx',
-    pStatus: ProjectStatus.LOW,
-    widgt: 10,
+    "risk_level": "高风险",
+    "name": "Google TensorFlow‌",
+    "description": "TensorFlow是Google开发的开源机器学习框架，用于构建和训练深度学习模型。该项目的仓库位于GitHub，详细信息可以在其官方GitHub页面找到‌",
+    "id": "2"
   },
+  {
+    "risk_level": "高风险",
+    "name": "Google Angular‌",
+    "description": "Angular是Google开发的前端框架，用于构建单页和移动应用程序。其仓库位于GitHub，提供了丰富的功能和社区支持‌",
+    "id": "3"
+  }
 ]);
 const dangerChangeOption = {
   tooltip: {

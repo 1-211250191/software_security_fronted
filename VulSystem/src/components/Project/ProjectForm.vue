@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref, watch} from 'vue';
-import { ProjectStatus, type ProjectInfo } from './const';
-import {Lock, QuestionFilled} from "@element-plus/icons-vue";
+import { reactive, ref, watch } from 'vue';
+import { type ProjectInfo } from './const';
+import { QuestionFilled } from "@element-plus/icons-vue";
 import LanguageSelector from "@/components/Project/LanguageSelector.vue";
-import {ElMessage, type FormInstance} from "element-plus";
+import { ElMessage, type FormInstance, type UploadInstance, type UploadUserFile } from "element-plus";
 
 
 // props and emits
@@ -22,11 +22,12 @@ const newProject = reactive<ProjectInfo>(props.project ??
   index: 0,
   name: '',
   description: '',
-  pStatus: ProjectStatus.ING,
-  risk_level: 5,
+  // pStatus: ProjectStatus.ING,
+  risk_level: '暂无风险',
   language: 'java',
-  file: null,
-  company: 'Default Company Name'
+  // file: null,
+  company: 'Default Company Name',
+  risk_threshold: 10,
 })
 const formRef = ref(null);
 
@@ -46,15 +47,15 @@ const rules = {
 
 
 // language change
-function handleChangeLanguage(language: string){
+function handleChangeLanguage(language: string) {
   newProject.language = language;
 }
 
 
 // file upload
-const uploader = ref(null)
-function handleFileChange(file){
-  if (file.size / 1024 / 1024 > 100) {
+const uploader = ref<UploadInstance>()
+function handleFileChange(file) {
+  if (file.size && file.size / 1024 / 1024 > 100) {
     ElMessage.error('文件大小不能超过100MB')
     return
   }
@@ -62,9 +63,12 @@ function handleFileChange(file){
 }
 const removeFile = () => {
   newProject.file = null
-  uploader.value.clearFiles()
+  if (uploader.value) {
+    uploader.value.clearFiles()
+  }
+
 }
-async function handleConfirmCreate(formEl: FormInstance | undefined){
+async function handleConfirmCreate(formEl: FormInstance | undefined) {
   if (!formEl) return
   await formEl.validate((valid) => {
     if (valid) {
@@ -87,43 +91,36 @@ watch(() => props.project, (project) => {
 <template>
   <!-- 新增项目的对话框 -->
   <el-dialog v-model="dialogVisible" :title="type == 'add' ? '新增项目' : '编辑项目'" width="600">
-    <el-form
-      ref="formRef"
-      :model="newProject"
-      label-width="auto"
-      style="max-width: 600px"
-      :rules="rules"
-    >
+    <el-form ref="formRef" :model="newProject" label-width="auto" style="max-width: 600px" :rules="rules">
       <el-form-item label="项目名称" prop="name">
-        <el-input v-model="newProject.name" placeholder="请输入项目名称"/>
+        <el-input v-model="newProject.name" placeholder="请输入项目名称" />
       </el-form-item>
       <el-form-item label="项目描述">
-        <el-input v-model="newProject.description" type="textarea" placeholder="请输入项目描述"/>
+        <el-input v-model="newProject.description" type="textarea" placeholder="请输入项目描述" />
       </el-form-item>
       <el-form-item label="风险阈值" prop="risk_threshold">
-        <el-input-number v-model="newProject.risk_threshold" :min="0" :max="20"/>
+        <el-input-number v-model="newProject.risk_threshold" :min="0" :max="20" />
         <div class="tips">
           <el-tooltip content="风险阈值是指项目中漏洞数量超过多少时，项目状态会变为风险状态。<br>当风险阈值为零时，代表高风险风险阈值。" raw-content placement="top">
-            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+            <el-icon class="question-icon">
+              <QuestionFilled />
+            </el-icon>
           </el-tooltip>
         </div>
       </el-form-item>
-      <el-form-item label="项目语言" v-if="type=='add'">
-        <LanguageSelector @select="handleChangeLanguage"/>
+      <el-form-item label="项目语言" v-if="type == 'add'">
+        <LanguageSelector @select="handleChangeLanguage" />
       </el-form-item>
-      <el-form-item label="项目文件" prop="file" v-if="type=='add'">
+      <el-form-item label="项目文件" prop="file" v-if="type == 'add'">
         <div class="upload-file-container">
-          <el-upload
-            ref="uploader"
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :show-file-list="false"
-            :multiple="false"
-          >
+          <el-upload ref="uploader" :auto-upload="false" :on-change="handleFileChange" :show-file-list="false"
+            :multiple="false">
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
               <el-tooltip content="上传项目依赖文件或编译后的二进制文件。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
-                <el-icon class="question-icon"><QuestionFilled /></el-icon>
+                <el-icon class="question-icon">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </el-upload>
@@ -146,7 +143,7 @@ watch(() => props.project, (project) => {
 </template>
 
 <style scoped>
-.tips{
+.tips {
   display: flex;
   align-items: center;
 
@@ -154,30 +151,29 @@ watch(() => props.project, (project) => {
   cursor: pointer;
 }
 
-.question-icon{
+.question-icon {
   color: #9da0a4;
   font-size: 20px;
   line-height: 16px;
   height: 20px;
 }
 
-.upload-file-container{
+.upload-file-container {
   display: flex;
   flex-direction: column;
   align-items: start;
 
-  span{
+  span {
     font-size: 13px;
     font-weight: 500;
   }
 
-  .selected-file{
+  .selected-file {
     margin-top: 10px;
   }
 
-  .remove-button{
+  .remove-button {
     margin-left: 10px;
   }
 }
-
 </style>

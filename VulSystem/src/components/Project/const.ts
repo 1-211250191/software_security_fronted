@@ -1,18 +1,17 @@
-export enum ProjectStatus {
-  'SAFE',
-  'LOW',
-  'HIGH',
-  'ING',
-}
+// export enum ProjectStatus {
+//   '暂无风险',
+//   '低风险',
+//   '高风险',
+//   '中风险',
+// }
 
 export interface ProjectInfo {
   index: number
   // title: string
   // desc: string
-  pStatus: ProjectStatus
+  // pStatus: ProjectStatus
   // danger?: number
   // widgt?: number
-
   /**
    * 项目描述
    */
@@ -30,17 +29,17 @@ export interface ProjectInfo {
    */
   risk_threshold: number
   /**
-    * 项目语言
-    */
+   * 项目语言
+   */
   language: string
   /**
-    * 公司名
-    */
+   * 公司名
+   */
   company: string
   /**
    * 文件
    */
-  file: object
+  file?: object | null
 }
 
 export interface ProjectInfoDetail {
