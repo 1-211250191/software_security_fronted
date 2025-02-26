@@ -19,7 +19,7 @@
     <DataCard title="项目统计">
       <template #main>
         <div class="static">
-          <el-statistic :value="3" :value-style="{ fontSize: '36px', color: '#336fff' }">
+          <el-statistic :value="projectStatistic?.projectNum" :value-style="{ fontSize: '36px', color: '#336fff' }">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 <el-icon style="margin-right: 4px" :size="14">
@@ -29,7 +29,8 @@
               </div>
             </template>
           </el-statistic>
-          <el-statistic :value="2" :value-style="{ fontSize: '36px', color: '#336fff' }">
+          <el-statistic :value="projectStatistic?.highRiskNum ?? 0 + (projectStatistic?.lowRiskNum ?? 0)"
+            :value-style="{ fontSize: '36px', color: '#336fff' }">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 <el-icon style="margin-right: 4px" :size="14">
@@ -88,12 +89,13 @@ import {
   type ProjectListResponse, updateProject
 } from "@/components/Project/apis.ts";
 import LoadingFrames from "@/components/LoadingFrames.vue";
+import { getCompanyStatic, type StatisticsInfo } from '@/components/Statistic/const';
 
-const option = {
+const option = ref({
   tooltip: {
     trigger: 'axis',
     axisPointer: {
-      type: 'shadow' // Use shadow pointer
+      // type: 'shadow' // Use shadow pointer
     }
   },
   legend: {
@@ -113,7 +115,9 @@ const option = {
   xAxis: {
     type: 'value',
     show: false, // Hide the x-axis
-    position: 'bottom'
+    position: 'bottom',
+    // max: 1.2,
+    // min: 1,
   },
   yAxis: {
     type: 'category',
@@ -131,13 +135,15 @@ const option = {
       emphasis: {
         focus: 'series'
       },
-      data: [2],
+      data: [0],
       itemStyle: {
         borderRadius: 5,
         // color: '#EE6666' // 设置颜色
         color: '#9045ff'
       },
-      barMaxWidth: 45 // 设置柱子的最大宽度，可以控制柱子的整体高度
+      barMaxWidth: 45, // 设置柱子的最大宽度，可以控制柱子的整体高度
+      // barMinHeight: 50, // 设置柱子的最小高度
+      // z: 5
     },
     {
       name: '低风险',
@@ -149,35 +155,117 @@ const option = {
       emphasis: {
         focus: 'series'
       },
-      data: [1],
+      data: [0],
       itemStyle: {
         borderRadius: 5, // Add rounded corners
         // color: '#fac858'
         color: '#e3ebff',
-      }
+      },
+      // barMinHeight: 50, // 设置柱子的最小高度
+      // barMaxHeitht: 50,
+      // z: 3
     },
-    // {
-    //   name: '暂无风险',
-    //   type: 'bar',
-    //   stack: 'total',
-    //   label: {
-    //     show: true
-    //   },
-    //   emphasis: {
-    //     focus: 'series'
-    //   },
-    //   data: [0],
-    //   itemStyle: {
-    //     borderRadius: 5, // Add rounded corners
-    //     // color: '#91cc75'
-    //     color: '#336fff',
-    //   },
-    //   barCategoryGap: '30%', // 设置柱状图之间的间隔
-    // },
+    {
+      name: '暂无风险',
+      type: 'bar',
+      stack: 'total',
+      label: {
+        show: true
+      },
+      emphasis: {
+        focus: 'series'
+      },
+      data: [2],
+      itemStyle: {
+        borderRadius: 5, // Add rounded corners
+        // color: '#91cc75'
+        color: '#336fff',
+      },
+      barCategoryGap: '30%', // 设置柱状图之间的间隔
+      // barMinHeight: 50,// 设置柱子的最小高度
+      // barMaxHeitht: 50,
+      // z: 1,
+    },
 
   ]
-};
+});
 
+// const option = ref({
+//   tooltip: {
+//     trigger: 'axis',
+//     axisPointer: {
+//       type: 'shadow',
+//     },
+//   },
+//   legend: {
+//     orient: 'horizontal',
+//     bottom: '10%', // 图例位置下移
+//     data: ['高风险', '低风险', '暂无风险'],
+//   },
+//   grid: {
+//     left: '3%',
+//     right: '3%',
+//     top: '10%',
+//     bottom: '15%',
+//     containLabel: true,
+//   },
+//   xAxis: {
+//     type: 'value',
+//     show: false, // 隐藏横坐标
+//   },
+//   yAxis: {
+//     type: 'category',
+//     data: ['风险评估'], // 只有一行
+//     show: false, // 隐藏纵坐标
+//   },
+//   series: [
+//     {
+//       name: '高风险',
+//       type: 'bar',
+//       label: {
+//         show: true,
+//         position: 'right', // 标签位置在右侧
+//         formatter: '{c}', // 显示数值
+//       },
+//       data: [2],
+//       itemStyle: {
+//         color: '#9045ff', // 高风险颜色
+//         borderRadius: [5, 5, 5, 5], // 圆角
+//       },
+//       barMaxWidth: 60, // 最大宽度
+//     },
+//     {
+//       name: '低风险',
+//       type: 'bar',
+//       label: {
+//         show: true,
+//         position: 'right',
+//         formatter: '{c}', // 显示数值
+//       },
+//       data: [4],
+//       itemStyle: {
+//         color: '#e3ebff', // 低风险颜色
+//         borderRadius: [5, 5, 5, 5], // 圆角
+//       },
+//       barMaxWidth: 60,
+//     },
+//     {
+//       name: '暂无风险',
+//       type: 'bar',
+//       label: {
+//         show: true,
+//         position: 'right',
+//         formatter: '{c}', // 显示数值
+//       },
+//       data: [12],
+//       itemStyle: {
+//         color: '#336fff', // 暂无风险颜色
+//         borderRadius: [5, 5, 5, 5], // 圆角
+//       },
+//       barMaxWidth: 60,
+//     },
+//   ],
+// })
 const addFormVisible = ref(false)
 const handleAddProject = (newProject: ProjectInfo) => {
   console.log(newProject);
@@ -275,7 +363,6 @@ const isLoading = ref(true);
 
 // project list
 const projectInfos = reactive<ProjectInfo[]>([]);
-
 async function getProjects(companyId: number) {
   isLoading.value = true;
   const page = 1;
@@ -313,10 +400,87 @@ async function getProjects(companyId: number) {
 
   isLoading.value = false;
 }
-
+const projectStatistic = ref<StatisticsInfo>()
 onMounted(() => {
   const companyId = 1; // mock data, should be replaced by real data
   getProjects(companyId);
+  // 获取统计信息
+  getCompanyStatic()
+    .then(res => {
+      const statistics: StatisticsInfo = res.data.obj
+      projectStatistic.value = statistics
+      // 项目风险等级分布
+      const newOptionSeries = [
+        {
+          name: '高风险',
+          type: 'bar',
+          stack: 'total',
+          label: {
+            show: statistics.highRiskNum != 0
+            // show: true
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          data: [statistics.highRiskNum],
+          itemStyle: {
+            borderRadius: 5,
+            // color: '#EE6666' // 设置颜色
+            color: '#9045ff'
+          },
+          barMaxWidth: 45, // 设置柱子的最大宽度，可以控制柱子的整体高度
+          // barMinHeight: 50, // 设置柱子的最小高度
+          barMaxHeight: 30
+          // z: 3,
+        },
+        {
+          name: '低风险',
+          type: 'bar',
+          stack: 'total',
+          label: {
+            // show: true
+            show: statistics.lowRiskNum != 0
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          data: [statistics.lowRiskNum],
+          itemStyle: {
+            borderRadius: 5, // Add rounded corners
+            // color: '#fac858'
+            color: '#e3ebff',
+          },
+          barMinHeight: 5, // 设置柱子的最小高度
+          // z: 2,
+        },
+        {
+          name: '暂无风险',
+          type: 'bar',
+          stack: 'total',
+          label: {
+            show: statistics.noRiskNum != 0
+            // show: true
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          data: [statistics.noRiskNum],
+          // data: 5,
+          itemStyle: {
+            borderRadius: 5, // Add rounded corners
+            // color: '#91cc75'
+            color: '#336fff',
+          },
+          barCategoryGap: '30%', // 设置柱状图之间的间隔
+          barMinHeight: 50, // 设置柱子的最小高度
+        },
+      ]
+      option.value = {
+        ...option.value,
+        series: newOptionSeries
+      }
+
+    })
 })
 </script>
 

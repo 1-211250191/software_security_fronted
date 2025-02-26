@@ -18,11 +18,11 @@
         </el-tooltip>
       </div>
 
-      <DataSetting threshold-name="相似度阈值" :threshold="stratage.similarityThreshold" :K="stratage.maxDetectNums"
-        @update:threshold="updateThreshold" @update:K="updateK" />
+      <DataSetting threshold-name="相似度阈值" :threshold="stratage?.similarityThreshold ?? 0.5"
+        :K="stratage?.maxDetectNums ?? 1" @update:threshold="updateThreshold" @update:K="updateK" />
       <div class="llm-list">
-        <LlmInfo v-for="llm in llmList" :key="llm.llmName" :is-vip="false"
-          :is-chosen="llm.llmName == stratage.detect_strategy" :info="llm" @update:name="updateStratageName" />
+        <LlmInfo v-for="llm in llmList" :key="llm.llmName" :is-vip="stratage?.is_member == 1"
+          :is-chosen="llm.llmName == stratage?.detect_strategy" :info="llm" @update:name="updateStratageName" />
       </div>
     </template>
   </DataCard>
@@ -33,12 +33,12 @@
 <script setup lang="ts">
 import { ArrowRight, Setting, InfoFilled } from '@element-plus/icons-vue'
 import DataCard from '@/components/DataCard.vue';
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import DataSetting from '@/components/Optimize/DataSetting.vue';
 import LlmInfo from '@/components/Optimize/LlmInfo.vue';
-import type { LlmInfoType } from '@/components/Optimize/const';
-import { api } from './service';
+import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
 import { ElMessage } from 'element-plus';
+import { changeStrategy, getStrategy } from '@/components/Optimize/service';
 // const chosenLlmName = ref<string>('VulLibMiner')
 const llmList = reactive<LlmInfoType[]>([
   {
@@ -112,54 +112,49 @@ const llmList = reactive<LlmInfoType[]>([
 // const threshold = ref<number>(0.5);
 // const K = ref<number>(3);
 
-interface StratageRequest {
-  companyId: number;
-  /**
-   *
-   * 检测策略：共十种(LLM,TinyModel,LLM-lev;TinyModel-lev,LLM-cos;TinyModel-cos,LLM-lcs;TinyModel-lcs,LLM-whiteList;TinyModel-whiteList)
-   */
-  detect_strategy: string;
-  /**
-   * 单位漏洞报告中检测出漏洞库的最大数量 1~3
-   */
-  maxDetectNums: number;
-  /**
-   * 相似度阈值 0~1
-   */
-  similarityThreshold: number;
-}
-const stratage = ref<StratageRequest>({
-  companyId: 1,
-  detect_strategy: 'VulLibMiner',
-  maxDetectNums: 1,
-  similarityThreshold: 0.5
+
+const stratage = ref<CompanyStrategy>()
+onMounted(() => {
+  getStrategy()
+    .then(res => {
+      stratage.value = res.data.obj
+    })
 })
 // 更新阈值的处理函数
 const updateThreshold = (value: number) => {
-  stratage.value.similarityThreshold = value
-  changeStratage()
+  if (stratage.value) {
+    stratage.value.similarityThreshold = value
+    changeStratage()
+  }
+
 };
 
 // 更新 K 值的处理函数
 const updateK = (value: number) => {
-  stratage.value.maxDetectNums = value
-  changeStratage()
+  if (stratage.value) {
+    stratage.value.maxDetectNums = value
+    changeStratage()
+  }
 };
 
 const updateStratageName = (value: string) => {
-  stratage.value.detect_strategy = value
-  // 将对应策略放到最前面
-  const index = llmList.findIndex(item => item.llmName === value);
-  if (index !== -1) {
-    const [itemToMove] = llmList.splice(index, 1); // 删除原数组中的该项
-    llmList.unshift(itemToMove); // 将删除的项插入数组最前面
+  if (stratage.value) {
+    stratage.value.detect_strategy = value
+    // 将对应策略放到最前面
+    const index = llmList.findIndex(item => item.llmName === value);
+    if (index !== -1) {
+      const [itemToMove] = llmList.splice(index, 1); // 删除原数组中的该项
+      llmList.unshift(itemToMove); // 将删除的项插入数组最前面
+    }
+    changeStratage()
   }
-  changeStratage()
 }
 
 const changeStratage = () => {
-  api.changeStratage(stratage.value)
-    .then(res => ElMessage.success('已成功修改配置'))
+  if (stratage.value) {
+    changeStrategy(stratage.value)
+      .then(() => ElMessage.success('已成功修改配置'))
+  }
 }
 
 </script>

@@ -72,24 +72,6 @@ defineProps<{
 }>();
 
 const dangerProjectInfos = reactive<ProjectInfo[]>([
-  {
-    "risk_level": "低风险",
-    "name": "Google Guava",
-    "description": "Guava是Google开发的Java库，提供了许多实用的工具类和功能。其仓库位于GitHub，是Java开发中常用的工具库‌",
-    "index": 1
-  },
-  {
-    "risk_level": "高风险",
-    "name": "Google TensorFlow‌",
-    "description": "TensorFlow是Google开发的开源机器学习框架，用于构建和训练深度学习模型。该项目的仓库位于GitHub，详细信息可以在其官方GitHub页面找到‌",
-    "index": 2
-  },
-  {
-    "risk_level": "高风险",
-    "name": "Google Angular‌",
-    "description": "Angular是Google开发的前端框架，用于构建单页和移动应用程序。其仓库位于GitHub，提供了丰富的功能和社区支持‌",
-    "index": 3
-  }
 ]);
 const dangerChangeOption = ref({
   tooltip: {

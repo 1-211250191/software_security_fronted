@@ -6,3 +6,38 @@ export interface LlmInfoType {
   accuracy: number
   falseRate: number
 }
+export interface StrategyRequest {
+  companyId: number
+  /**
+   *
+   * 检测策略：共十种(LLM,TinyModel,LLM-lev;TinyModel-lev,LLM-cos;TinyModel-cos,LLM-lcs;TinyModel-lcs,LLM-whiteList;TinyModel-whiteList)
+   */
+  detect_strategy: string
+  /**
+   * 单位漏洞报告中检测出漏洞库的最大数量 1~3
+   */
+  maxDetectNums: number
+  /**
+   * 相似度阈值 0~1
+   */
+  similarityThreshold: number
+}
+export interface CompanyStrategy {
+  /**
+   *
+   * 检测策略：共十种(LLM,TinyModel,LLM-lev;TinyModel-lev,LLM-cos;TinyModel-cos,LLM-lcs;TinyModel-lcs,LLM-whiteList;TinyModel-whiteList)
+   */
+  detect_strategy: string
+  /**
+   * 是否会员
+   */
+  is_member: number
+  /**
+   * 单位漏洞报告中检测出漏洞库的最大数量 1~3
+   */
+  maxDetectNums: number
+  /**
+   * 相似度阈值 0~1
+   */
+  similarityThreshold: number
+}

@@ -26,13 +26,4 @@ export const api = {
       },
     })
   },
-
-  changeStratage(data: {
-    companyId: number
-    detect_strategy: string
-    maxDetectNums: number
-    similarityThreshold: number
-  }) {
-    return axios.post('/company/updateStrategy', data)
-  },
 }
