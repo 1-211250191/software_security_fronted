@@ -6,12 +6,10 @@
 // }
 
 export interface ProjectInfo {
-  index: number
-  // title: string
-  // desc: string
-  // pStatus: ProjectStatus
-  // danger?: number
-  // widgt?: number
+  /**
+   * 项目id
+   */
+  id: number
   /**
    * 项目描述
    */
@@ -35,11 +33,11 @@ export interface ProjectInfo {
   /**
    * 公司名
    */
-  company: string
+  companyId: string
   /**
-   * 文件
+   * 文件路径
    */
-  file?: object | null
+  filePath: string | null
 }
 
 export interface ProjectInfoDetail {

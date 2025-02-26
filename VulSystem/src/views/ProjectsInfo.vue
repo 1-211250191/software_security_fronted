@@ -79,7 +79,7 @@ import DataCard from '@/components/DataCard.vue';
 import WChart from '@/components/chart/index.vue'
 import PInfo from '@/components/Project/PInfo.vue';
 import { type ProjectInfo } from '@/components/Project/const';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import ProjectForm from '@/components/Project/ProjectForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
@@ -190,95 +190,11 @@ const option = ref({
   ]
 });
 
-// const option = ref({
-//   tooltip: {
-//     trigger: 'axis',
-//     axisPointer: {
-//       type: 'shadow',
-//     },
-//   },
-//   legend: {
-//     orient: 'horizontal',
-//     bottom: '10%', // 图例位置下移
-//     data: ['高风险', '低风险', '暂无风险'],
-//   },
-//   grid: {
-//     left: '3%',
-//     right: '3%',
-//     top: '10%',
-//     bottom: '15%',
-//     containLabel: true,
-//   },
-//   xAxis: {
-//     type: 'value',
-//     show: false, // 隐藏横坐标
-//   },
-//   yAxis: {
-//     type: 'category',
-//     data: ['风险评估'], // 只有一行
-//     show: false, // 隐藏纵坐标
-//   },
-//   series: [
-//     {
-//       name: '高风险',
-//       type: 'bar',
-//       label: {
-//         show: true,
-//         position: 'right', // 标签位置在右侧
-//         formatter: '{c}', // 显示数值
-//       },
-//       data: [2],
-//       itemStyle: {
-//         color: '#9045ff', // 高风险颜色
-//         borderRadius: [5, 5, 5, 5], // 圆角
-//       },
-//       barMaxWidth: 60, // 最大宽度
-//     },
-//     {
-//       name: '低风险',
-//       type: 'bar',
-//       label: {
-//         show: true,
-//         position: 'right',
-//         formatter: '{c}', // 显示数值
-//       },
-//       data: [4],
-//       itemStyle: {
-//         color: '#e3ebff', // 低风险颜色
-//         borderRadius: [5, 5, 5, 5], // 圆角
-//       },
-//       barMaxWidth: 60,
-//     },
-//     {
-//       name: '暂无风险',
-//       type: 'bar',
-//       label: {
-//         show: true,
-//         position: 'right',
-//         formatter: '{c}', // 显示数值
-//       },
-//       data: [12],
-//       itemStyle: {
-//         color: '#336fff', // 暂无风险颜色
-//         borderRadius: [5, 5, 5, 5], // 圆角
-//       },
-//       barMaxWidth: 60,
-//     },
-//   ],
-// })
 const addFormVisible = ref(false)
 const handleAddProject = (newProject: ProjectInfo) => {
   console.log(newProject);
 
-  const formData = new FormData();
-  formData.append('name', newProject.name);
-  formData.append('description', newProject.description);
-  formData.append('risk_threshold', newProject.risk_threshold);
-  formData.append('language', newProject.language);
-  formData.append('companyName', newProject.company)
-  formData.append('file', newProject.file);
-
-  createProject(formData).then((res: ProjectCreateResponse) => {
+  createProject(newProject).then((res: ProjectCreateResponse) => {
     console.log(res);
     if (res.code === 200) {
       ElMessage({
@@ -299,13 +215,7 @@ const handleAddProject = (newProject: ProjectInfo) => {
 const handleEditProject = (project: ProjectInfo) => {
   console.log(project);
 
-  const formData = new FormData();
-  formData.append('name', project.name);
-  formData.append('description', project.description);
-  formData.append('risk_threshold', project.risk_threshold);
-  formData.append('id', project.index);
-
-  updateProject(formData).then((res: ProjectCreateResponse) => {
+  updateProject(project).then((res: ProjectCreateResponse) => {
     console.log(res);
     if (res.code === 200) {
       ElMessage({
@@ -331,10 +241,8 @@ const handleDeleteProject = (project: ProjectInfo) => {
   })
     .then(() => {
       console.log(project);
-      let formData = new FormData();
-      formData.append('id', project.index);
 
-      deleteProject(formData).then((res: ProjectCreateResponse) => {
+      deleteProject(project).then((res: ProjectCreateResponse) => {
         console.log(res);
         if (res.code === 200) {
           ElMessage({
@@ -353,7 +261,10 @@ const handleDeleteProject = (project: ProjectInfo) => {
       });
     })
     .catch(() => {
-
+      ElMessage({
+        type: 'info',
+        message: '已取消删除'
+      });
     })
 }
 
@@ -362,7 +273,7 @@ const isLoading = ref(true);
 
 
 // project list
-const projectInfos = reactive<ProjectInfo[]>([]);
+const projectInfos = ref<ProjectInfo[]>([]);
 async function getProjects(companyId: number) {
   isLoading.value = true;
   const page = 1;
@@ -370,29 +281,13 @@ async function getProjects(companyId: number) {
 
   projectInfos.value = [];
   await getProjectList(page, pageSize, companyId).then((res) => {
-    let data: ProjectListResponse = res;
+    const data: ProjectListResponse = res;
     if (data.code !== 200) {
       ElMessage.error('获取项目列表失败');
       console.error(data);
       return;
     }
-    for (let i = 0; i < data.obj.length; i++) {
-      // let pStatus: ProjectStatus = ProjectStatus.SAFE;
-      // if(data.obj[i].risk_level === '高风险'){
-      //   pStatus = ProjectStatus.HIGH;
-      // }else if(data.obj[i].risk_level === '中风险'){
-      //   pStatus = ProjectStatus.ING;
-      // }else{
-      //   pStatus = ProjectStatus.LOW;
-      // }
-      projectInfos.push({
-        index: data.obj[i].id,
-        name: data.obj[i].name,
-        description: data.obj[i].description,
-        risk_level: data.obj[i].risk_level,
-        // pStatus: pStatus
-      });
-    }
+    projectInfos.value = data.obj;
   }).catch((err) => {
     console.log(err);
     ElMessage.error('获取项目列表失败');
