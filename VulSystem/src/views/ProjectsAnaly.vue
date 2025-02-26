@@ -25,7 +25,7 @@
       <DataCard title="组件统计">
         <template #main>
           <div class="static">
-            <el-statistic :value="60" :value-style="{ fontSize: '36px', color: '#336fff' }">
+            <el-statistic :value="thirdLibraryNum" :value-style="{ fontSize: '36px', color: '#336fff' }">
               <template #title>
                 <div style="display: inline-flex; align-items: center">
                   <el-icon style="margin-right: 4px" :size="14">
@@ -35,7 +35,7 @@
                 </div>
               </template>
             </el-statistic>
-            <el-statistic :value="5" :value-style="{ fontSize: '36px', color: '#336fff' }">
+            <el-statistic :value="vulNum" :value-style="{ fontSize: '36px', color: '#336fff' }">
               <template #title>
                 <div style="display: inline-flex; align-items: center">
                   <el-icon style="margin-right: 4px" :size="14">
@@ -64,8 +64,9 @@ import { ArrowRight, Tickets, Reading, DocumentCopy } from '@element-plus/icons-
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
 import PInfo from '@/components/Project/PInfo.vue';
-import { type ProjectInfo, type ProjectInfoDetail } from '@/components/Project/const';
-import { reactive } from 'vue';
+import { type ProjectInfo } from '@/components/Project/const';
+import { onMounted, reactive, ref } from 'vue';
+import { getCompanyStatic, type StatisticsInfo } from '@/components/Statistic/const';
 defineProps<{
   project: string
 }>();
@@ -75,22 +76,22 @@ const dangerProjectInfos = reactive<ProjectInfo[]>([
     "risk_level": "低风险",
     "name": "Google Guava",
     "description": "Guava是Google开发的Java库，提供了许多实用的工具类和功能。其仓库位于GitHub，是Java开发中常用的工具库‌",
-    "id": "1"
+    "index": 1
   },
   {
     "risk_level": "高风险",
     "name": "Google TensorFlow‌",
     "description": "TensorFlow是Google开发的开源机器学习框架，用于构建和训练深度学习模型。该项目的仓库位于GitHub，详细信息可以在其官方GitHub页面找到‌",
-    "id": "2"
+    "index": 2
   },
   {
     "risk_level": "高风险",
     "name": "Google Angular‌",
     "description": "Angular是Google开发的前端框架，用于构建单页和移动应用程序。其仓库位于GitHub，提供了丰富的功能和社区支持‌",
-    "id": "3"
+    "index": 3
   }
 ]);
-const dangerChangeOption = {
+const dangerChangeOption = ref({
   tooltip: {
     trigger: 'axis'
   },
@@ -150,9 +151,9 @@ const dangerChangeOption = {
       }
     },
   ]
-};
+});
 
-const languageOption = {
+const languageOption = ref({
   tooltip: {
     trigger: 'item'
   },
@@ -193,14 +194,101 @@ const languageOption = {
         show: false
       },
       data: [
-        { value: 1048, name: 'Java' },
-        { value: 735, name: 'C++' },
-        { value: 580, name: 'Go' },
-        { value: 300, name: '其它' }
+        { value: 0, name: 'Java' },
+        { value: 0, name: 'C++' },
+        // { value: 580, name: 'Go' },
+        { value: 0, name: '其它' }
       ]
     }
   ]
-};
+});
+const getVulChangeData = (level: 'high' | 'mid' | 'low', statistic: StatisticsInfo) => {
+  let str = '{}'
+  if (level == 'high') {
+    str = statistic.highVulnerabilityNumByDay
+  } else if (level == 'mid') {
+    str = statistic.midVulnerabilityNumByDay
+  } else if (level == 'low') {
+    str = statistic.lowVulnerabilityNumByDay
+  }
+  const jsonStr = JSON.parse(str)
+  const week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const data: number[] = []
+  // eslint-disable-next-line prefer-const
+  for (let day of week) {
+    data.push(jsonStr[day] ?? 0)
+  }
+  return data
+}
+
+const thirdLibraryNum = ref<number>(0)
+const vulNum = ref<number>(0)
+onMounted(() => {
+  getCompanyStatic()
+    .then(res => {
+      const statistics: StatisticsInfo = res.data.obj
+      const vulnerabilityNum = statistics.vulnerabilityNum
+
+      // 修改三方库数据
+      thirdLibraryNum.value = statistics.thirdLibraryNum
+      vulNum.value = vulnerabilityNum
+
+
+      // 修改语言饼状图配置
+      const otherLanguage = vulnerabilityNum - statistics.javaVulnerabilityNum - statistics.cVulnerabilityNum
+      const newLanguageSeries = [{
+        ...languageOption.value.series[0],
+        data: [
+          { value: statistics.javaVulnerabilityNum, name: 'Java' },
+          { value: statistics.cVulnerabilityNum, name: 'C/C++' },
+          // { value: 580, name: 'Go' },
+          { value: otherLanguage, name: '其它' }
+        ]
+      }]
+      languageOption.value = {
+        ...languageOption.value,
+        series: newLanguageSeries
+      }
+
+      // 修改漏洞情况统计折现图
+      const newDangerChangeSeries = [
+        {
+          name: '高风险',
+          type: 'line',
+          // stack: 'Total',
+          smooth: true,
+          data: getVulChangeData('high', statistics),
+          itemStyle: {
+            color: '#f5800c',
+          }
+        },
+        {
+          name: '中风险',
+          type: 'line',
+          // stack: 'Total',
+          smooth: true,
+          data: getVulChangeData('mid', statistics),
+          itemStyle: {
+            color: '#fac858',
+          }
+        },
+        {
+          name: '低风险',
+          type: 'line',
+          // stack: 'Total',
+          smooth: true,
+          data: getVulChangeData('low', statistics),
+          itemStyle: {
+            color: '#91cc75',
+          }
+        },
+      ]
+      dangerChangeOption.value = {
+        ...dangerChangeOption.value,
+        series: newDangerChangeSeries
+      }
+    })
+})
 
 
 </script>

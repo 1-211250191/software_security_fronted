@@ -40,9 +40,23 @@ instance.interceptors.request.use(
     // 拦截器成功函数
 
     // 暂时不可这样做，原因：formData 中含有文件，querystring.stringify 会将文件转为字符串
-    // if (config.method == 'post') {
-    //   config.data = querystring.stringify(config.data)
-    // }
+    if (config.method == 'post') {
+      // config.data = querystring.stringify(config.data)
+      // 由于后端处理post请求是用的@RequestParams，故这里将请求体转成表单对象
+      const formData = new FormData()
+
+      // 将config.data中的每一个键值对添加到formData
+      Object.keys(config.data).forEach((key) => {
+        // 假设config.data[key]可能是文件，使用append添加
+        formData.append(key, config.data[key])
+      })
+
+      // 将formData赋给config.data
+      config.data = formData
+
+      // 设置正确的Content-Type
+      config.headers['Content-Type'] = 'multipart/form-data'
+    }
 
     // config:包含着网络请求的所有信息
     return config

@@ -142,7 +142,7 @@ onMounted(() => {
   api.getProjectDetail(props.projectId)
     .then(res => {
       projectInfo.value = res.data.obj
-      const newOptionSeries = {
+      const newOptionSeries = [{
         data: [
           {
             value: projectInfo.value?.highRiskNum ?? 0,
@@ -181,11 +181,11 @@ onMounted(() => {
         ],
         type: 'bar',
         barWidth: 25
-      }
+      }]
 
       option.value = {
         ...option.value,
-        series: [newOptionSeries],
+        series: newOptionSeries,
       };
       // if (mychart.value) {
       //   mychart.value.setData(option.value)

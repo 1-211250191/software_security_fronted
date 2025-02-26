@@ -90,8 +90,8 @@ const emit = defineEmits(['update:name'])
     /* 为了使用 WebKit 的剪裁 */
     -webkit-box-orient: vertical;
     /* 设置方向为垂直 */
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     /* 设置显示的行数 */
     overflow: hidden;
     /* 隐藏超出内容 */
@@ -100,7 +100,7 @@ const emit = defineEmits(['update:name'])
   }
 
   .footer {
-    border-top: 1px solid #efefefd5;
+    /* border-top: 1px solid #efefefd5; */
     height: 50px;
 
     .data-info {

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import type { DangerInfo } from './const';
 import AdviceCard from './AdviceCard.vue';
+import { acceptVul } from './apis';
 
 const props = withDefaults(
   defineProps<{
@@ -58,10 +59,14 @@ watch(() => props.info.isaccept, (newValue) => {
 });
 
 const dialogVisible = ref<boolean>(false)
+const loading = ref<boolean>(false)
 // 采纳漏洞
-const acceptVul = () => {
+const beforeAcceptChange = () => {
+  loading.value = true
+  // 1:采纳 2: 不采纳
+  const ifaccept = localAccept.value ? 2 : 1
+  return acceptVul(props.info.id, ifaccept).finally(() => loading.value = false)
 }
-
 const timeFormatter = (dateString: string) => {
   // 将字符串转换为 Date 对象
   const date = new Date(dateString);
@@ -105,7 +110,7 @@ const timeFormatter = (dateString: string) => {
       </div>
       <div class="right">
         <div class="label">采纳该问题</div>
-        <el-switch v-model="localAccept" />
+        <el-switch v-model="localAccept" :loading="loading" :before-change="beforeAcceptChange" />
       </div>
     </div>
   </div>
