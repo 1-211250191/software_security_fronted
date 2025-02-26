@@ -24,10 +24,6 @@
         <el-icon><ArrowRightBold></ArrowRightBold></el-icon>
         <span class="confirm-text">登录</span>
       </div>
-
-      <div class="other-container" @click="handleRegister">
-        还没有账户？<span class="link">去注册</span>
-      </div>
     </div>
   </div>
 </template>
@@ -41,13 +37,11 @@ import {ArrowRightBold, Lock, User} from '@element-plus/icons-vue';
 
 const username = ref('')
 const passwd = ref('')
-const handleRegister = () => {
-  router.push('/register')
-}
 const handleLogin = () => {
   api.login(username.value, passwd.value)
     .then(res => {
       console.log(res);
+      localStorage.setItem('companyId', res.data.obj.companyId)
       router.push('/')
     })
     .catch(err => {

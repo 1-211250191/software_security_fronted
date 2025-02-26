@@ -3,7 +3,7 @@ import axios from '../utils/request'
 export const api = {
   login(username: string, password: string) {
     console.log(username, password)
-    return axios.post('')
+    return axios.get('/user/login', {params: {companyName: username, password: password}});
   },
 
   register(info) {
