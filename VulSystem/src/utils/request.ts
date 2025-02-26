@@ -1,5 +1,4 @@
 import axios from 'axios'
-import querystring from 'querystring'
 
 const errorHandle = (status: number, info: string) => {
   switch (status) {
