@@ -64,7 +64,7 @@ const handleEdit = (project: ProjectInfo) => {
   <div class="project-card" :class="classname">
     <div class="card-header">
       <div class="left">
-        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.index}` });">{{ project.name }}
+        <h2 class="card-title" @click="$router.push({ path: `/projects/info/${project.id}` });">{{ project.name }}
         </h2>
         <div class="text">{{ project.description }}</div>
         <!-- <el-text truncated type="info" size="small"></el-text> -->

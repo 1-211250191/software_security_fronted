@@ -1,10 +1,12 @@
 import instance from '@/utils/request.ts'
+import axios from 'axios'
+
 export interface VulnerabilityReportListResponse {
   code: number
   message: string
   obj: Obj
 
-  [property: string]: any
+  // [property: string]: never;
 }
 
 export interface Obj {
@@ -19,7 +21,7 @@ export interface Obj {
   size: number
   total: number
 
-  [property: string]: any
+  // [property: string]: never;
 }
 
 export interface Record {
@@ -32,7 +34,7 @@ export interface Record {
   cveId: string
   isDelete: number
 
-  [property: string]: any
+  // [property: string]: never;
 }
 
 export interface VulnerabilityReportSearchResponse {
@@ -59,6 +61,31 @@ export const getVulnerabilityReportSearch = (keyword: string) => {
   return new Promise((resolve, reject) => {
     instance
       .get(`/vulnerabilityReport/search?keyword=${keyword}`)
+      .then((res: AxiosResponse<VulnerabilityReportSearchResponse>) => {
+        resolve(res.data)
+      })
+      .catch((err: AxiosError) => {
+        console.error(err)
+        reject(err)
+      })
+  })
+}
+
+export const getFilteredVulnerabilityReport = (
+  riskLevel?: string,
+  startDate?: string,
+  endDate?: string,
+) => {
+  const params = new URLSearchParams()
+
+  if (riskLevel) params.append('riskLevel', riskLevel)
+  if (startDate) params.append('startDate', startDate)
+  if (endDate) params.append('endDate', endDate)
+
+  const url = `/vulnerabilityReport/filter?${params.toString()}`
+  return new Promise((resolve, reject) => {
+    instance
+      .get(url)
       .then((res: AxiosResponse<VulnerabilityReportSearchResponse>) => {
         resolve(res.data)
       })

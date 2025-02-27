@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { ReportInfo } from './const';
-import HighlightSearch from "@/components/text/HighlightSearch.vue";
-import {getSourceIcon, getSourceName} from "@/utils/parseSource.ts";
-import { ref, computed, watch } from 'vue';
+import {computed} from 'vue';
 import ReportListTable from "@/components/Danger/ReportListTable.vue";
 
 const props = defineProps<{
@@ -12,19 +10,16 @@ const props = defineProps<{
   totalPages: number
   totalItems: number
   searchQuery?: string
+  isFiltered: boolean
 }>()
 
-const currentPage = props.currentPage;
-const totalPages = props.totalPages;
-const totalItems = props.totalItems;
-const paginatedList = props.reportInfoList;
 
 const displayedPages = computed(() => {
   const pages = []
   const maxDisplayPages = 5
 
-  let start = Math.max(1, currentPage - 2)
-  let end = Math.min(totalPages, start + maxDisplayPages - 1)
+  let start = Math.max(1, props.currentPage - 2)
+  const end = Math.min(props.totalPages, start + maxDisplayPages - 1)
   if (end - start + 1 < maxDisplayPages) {
     start = Math.max(1, end - maxDisplayPages + 1)
   }
@@ -41,29 +36,28 @@ const displayedPages = computed(() => {
 
 <template>
   <div class="danger-card">
-    <ReportListTable v-if="searchQuery === ''" :paginated-list="paginatedList" :search-query="searchQuery" />
+    <ReportListTable v-if="!props.isFiltered" :paginated-list="props.reportInfoList" :search-query="searchQuery" />
     <ReportListTable v-else :paginated-list="filteredReports" :search-query="searchQuery" />
-
   </div>
-  <div class="card-footer" v-if="props.searchQuery === ''">
+  <div class="card-footer" v-if="!props.isFiltered">
     <div class="pagination">
       <span class="page-info">
-        <span>{{ currentPage }} / {{ totalPages }} 页</span><span>，共 {{ totalItems }} 条</span>
+        <span>{{ props.currentPage }} / {{ props.totalPages }} 页</span><span>，共 {{ props.totalItems }} 条</span>
       </span>
 
       <button
         class="controller page-btn"
-        :disabled="currentPage === 1"
+        :disabled="props.currentPage === 1"
         @click="$emit('update:currentPage', 1)"
-        v-if="currentPage > 3"
+        v-if="props.currentPage > 3"
       >
         首页
       </button>
 
       <button
         class="controller page-btn"
-        :disabled="currentPage === 1"
-        @click="$emit('update:currentPage', currentPage - 1)"
+        :disabled="props.currentPage === 1"
+        @click="$emit('update:currentPage', props.currentPage - 1)"
       >
         上一页
       </button>
@@ -72,7 +66,7 @@ const displayedPages = computed(() => {
         v-for="page in displayedPages"
         :key="page"
         class="page-btn"
-        :class="{ active: currentPage === page }"
+        :class="{ active: props.currentPage === page }"
         @click="$emit('update:currentPage', page)"
       >
         {{ page }}
@@ -80,17 +74,17 @@ const displayedPages = computed(() => {
 
       <button
         class="controller page-btn"
-        :disabled="currentPage === totalPages"
-        @click="$emit('update:currentPage', currentPage + 1)"
+        :disabled="props.currentPage === props.totalPages"
+        @click="$emit('update:currentPage', props.currentPage + 1)"
       >
         下一页
       </button>
 
       <button
         class="controller page-btn"
-        :disabled="currentPage === totalPages"
-        @click="$emit('update:currentPage', totalPages)"
-        v-if="currentPage < totalPages - 2"
+        :disabled="props.currentPage === props.totalPages"
+        @click="$emit('update:currentPage', props.totalPages)"
+        v-if="props.currentPage < props.totalPages - 2"
       >
         尾页
       </button>

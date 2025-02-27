@@ -3,7 +3,7 @@ import { reactive, ref, watch } from 'vue';
 import { type ProjectInfo } from './const';
 import { QuestionFilled } from "@element-plus/icons-vue";
 import LanguageSelector from "@/components/Project/LanguageSelector.vue";
-import { ElMessage, type FormInstance, type UploadInstance, type UploadUserFile } from "element-plus";
+import { ElMessage, type FormInstance, type UploadInstance } from "element-plus";
 
 
 // props and emits
@@ -22,27 +22,27 @@ const newProject = reactive<ProjectInfo>(props.project ??
   index: 0,
   name: '',
   description: '',
-  // pStatus: ProjectStatus.ING,
   risk_level: '暂无风险',
   language: 'java',
-  // file: null,
-  company: 'Default Company Name',
+  companyId: localStorage.getItem('companyId') ?? '',
   risk_threshold: 10,
+  filePath: null
 })
 const formRef = ref(null);
-
+const currentFile = ref<File | null>(null);
+const fileUploadServerBaseURL = 'http://localhost:8080'; //TODO: change to real server address
 
 // form rules
 const rules = {
   name: [
     { required: true, message: '请输入项目名称', trigger: 'blur' }
   ],
-  file: [
-    { required: true, message: '请上传项目文件', trigger: 'change' }
-  ],
   risk_threshold: [
     { required: true, message: '请输入风险阈值', trigger: 'blur' }
-  ]
+  ],
+  filePath: [
+    { required: true, message: '请上传项目文件', trigger: 'change' }
+  ],
 }
 
 
@@ -59,14 +59,30 @@ function handleFileChange(file) {
     ElMessage.error('文件大小不能超过100MB')
     return
   }
-  newProject.file = file.raw;
+  currentFile.value = file.raw;
+  console.log("已选择文件: ", currentFile.value)
 }
 const removeFile = () => {
-  newProject.file = null
+  currentFile.value = null
   if (uploader.value) {
     uploader.value.clearFiles()
   }
-
+}
+const uploadFile = () => {
+  if (uploader.value) {
+    uploader.value.submit()
+  }
+}
+const handleFileUploadSuccess = (response) => {
+  console.log('服务器的响应：', response)
+  if (response.code === 200) {
+    ElMessage.success('文件上传成功')
+    newProject.filePath = response.obj
+  } else {
+    ElMessage.error('文件上传失败：' + response.message + '，' + response.obj)
+    currentFile.value = null
+    uploader.value?.clearFiles()
+  }
 }
 async function handleConfirmCreate(formEl: FormInstance | undefined) {
   if (!formEl) return
@@ -76,7 +92,6 @@ async function handleConfirmCreate(formEl: FormInstance | undefined) {
     }
   })
 }
-
 
 // watches
 watch(() => props.visible, (newVal) => {
@@ -111,10 +126,17 @@ watch(() => props.project, (project) => {
       <el-form-item label="项目语言" v-if="type == 'add'">
         <LanguageSelector @select="handleChangeLanguage" />
       </el-form-item>
-      <el-form-item label="项目文件" prop="file" v-if="type == 'add'">
+      <el-form-item label="项目文件" prop="filePath" v-if="type == 'add'">
         <div class="upload-file-container">
-          <el-upload ref="uploader" :auto-upload="false" :on-change="handleFileChange" :show-file-list="false"
-            :multiple="false">
+          <el-upload
+            ref="uploader"
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :show-file-list="false"
+            :multiple="false"
+            :action="fileUploadServerBaseURL + '/project/uploadFile'"
+            :on-success="handleFileUploadSuccess"
+          >
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
               <el-tooltip content="上传项目依赖文件或编译后的二进制文件。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
@@ -124,9 +146,11 @@ watch(() => props.project, (project) => {
               </el-tooltip>
             </div>
           </el-upload>
-          <div v-if="newProject.file" class="selected-file">
-            <span>已选择文件: {{ newProject.file.name }}</span>
-            <el-button type="danger" size="small" @click="removeFile" class="remove-button">移除</el-button>
+          <div v-if="currentFile" class="selected-file">
+            <span>已选择文件: {{ currentFile.name }}</span>
+            <el-button type="danger" size="small" @click="removeFile" class="remove-button" v-if="newProject.filePath == null">移除</el-button>
+            <el-button type="primary" size="small" @click="uploadFile" v-if="newProject.filePath == null">上传</el-button>
+            <div class="upload-success" v-if="newProject.filePath != null">上传成功！</div>
           </div>
         </div>
       </el-form-item>
@@ -170,9 +194,17 @@ watch(() => props.project, (project) => {
 
   .selected-file {
     margin-top: 10px;
+    display: flex;
+    flex-direction: row;
   }
 
   .remove-button {
+    margin-left: 10px;
+  }
+
+  .upload-success {
+    color: #67c23a;
+    font-weight: bold;
     margin-left: 10px;
   }
 }

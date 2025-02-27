@@ -20,7 +20,13 @@
       <div class="search-filter-group">
         <div class="search-item">
           <div class="label">风险等级</div>
-          <el-select v-model="selectedRiskLevel" multiple placeholder="请选择" style="width: 240px;">
+          <el-select
+            v-model="selectedRiskLevel"
+            placeholder="请选择"
+            style="width: 240px;"
+            clearable
+            @clear="selectedRiskLevel = ''"
+          >
             <el-option v-for="item in riskLevelOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </div>
@@ -33,7 +39,7 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             style="width: 300px"
-            @clear="selectedTime = ''"
+            @clear="selectedTime=''"
           />
         </div>
       </div>
@@ -47,6 +53,7 @@
       :total-items="totalItems"
       :total-pages="totalPages"
       :filtered-reports="filteredReports"
+      :is-filtered="isFiltered"
       @update:currentPage="currentChange"
       v-else
     />
@@ -57,51 +64,25 @@
 import type { ReportInfo } from '@/components/Danger/const';
 import ReportList from '@/components/Danger/ReportList.vue';
 import { ArrowRight, DataLine, Search } from '@element-plus/icons-vue'
-import {ref, onMounted, watch, type Ref} from 'vue';
+import {ref, onMounted, watch, type Ref, computed} from 'vue';
 import {
+  getFilteredVulnerabilityReport,
   getVulnerabilityReportList,
   getVulnerabilityReportSearch,
   type VulnerabilityReportListResponse, type VulnerabilityReportSearchResponse
 } from "@/components/Danger/apis.ts";
 import LoadingFrames from "@/components/LoadingFrames.vue";
+import {dayjs} from "element-plus";
 
 const searchQuery = ref('')
 const selectedRiskLevel = ref('')
 const riskLevelOptions = ['Low', 'Medium', 'High']
-const selectedTime = ref('')
-
-// const reports = reactive<ReportInfo[]>([]);
-//
-// const filteredReports = computed(() => {
-//   console.log(selectedTime.value)
-//   return reports.filter(report => {
-//     if(searchQuery.value!='' && !((report.reportName.toLowerCase().includes(searchQuery.value.toLowerCase())||report.reportId.toLowerCase().includes(searchQuery.value.toLowerCase())))){
-//       return false;
-//     }
-//     if(selectedRiskLevel.value=='CVE' && !report.isCve){
-//       return false;
-//     }
-//     if(selectedRiskLevel.value=='Poc' && !report.isPoc){
-//       return false;
-//     }
-//     if(selectedRiskLevel.value.length == 2 && !(report.isCve && report.isPoc)){
-//       return false;
-//     }
-//     if(selectedTime.value!=''){
-//       const [start, end] = selectedTime.value;
-//       const reportTime = new Date(report.time).getTime();
-//       if(reportTime < new Date(start).getTime() || reportTime > new Date(end).getTime()){
-//         return false;
-//       }
-//     }
-//     return true;
-//   })
-// })
+const selectedTime = ref([])
 
 const reportList = ref<ReportInfo[]>([]);
-let currentPage = ref(1);
-let totalPages = ref(0);
-let totalItems = ref(0);
+const currentPage = ref(1);
+const totalPages = ref(0);
+const totalItems = ref(0);
 
 // loading-frames
 const isLoading = ref(true);
@@ -117,11 +98,11 @@ async function getReports(currentPage: number) {
   const pageSize = 10;
   reportList.value = [];
   await getVulnerabilityReportList(currentPage, pageSize).then((res) => {
-    let data:VulnerabilityReportListResponse = res;
+    const data:VulnerabilityReportListResponse = res;
     totalPages.value = data.obj.pages;
     totalItems.value = data.obj.total;
     for(let i=0; i<data.obj.records.length; i++) {
-        let report = data.obj.records[i];
+        const report = data.obj.records[i];
         reportList.value.push({
           reportName: report.vulnerabilityName,
           reportId: report.cveId,
@@ -135,16 +116,21 @@ async function getReports(currentPage: number) {
   isLoading.value = false;
 }
 
+// is in filter mode
+const isFiltered = computed(() => {
+  return (selectedRiskLevel.value ?? '') !== '' || ((selectedTime.value[0] ?? '') !== '' && (selectedTime.value[1] ?? '') !== '') || (searchQuery.value ?? '') !== '';
+});
+
 // search
 const filteredReports = ref([])
 
-function debounce<T extends (...args: any[]) => Promise<void> | void>(
+function debounce<T extends (...args: never[]) => Promise<void> | void>(
   fn: T,
   delay: number,
   isLoadingRef: Ref<boolean>
 ): T {
   let timeoutId: ReturnType<typeof setTimeout>;
-  return function (this: any, ...args: any[]) {
+  return function (this: never, ...args: never[]) {
     clearTimeout(timeoutId);
     isLoadingRef.value = true;
     timeoutId = setTimeout(async () => {
@@ -161,9 +147,9 @@ async function searchReports(keyword: string) {
   filteredReports.value = [];
   isLoading.value = true;
   await getVulnerabilityReportSearch(keyword).then((res) => {
-    let data:VulnerabilityReportSearchResponse = res;
+    const data:VulnerabilityReportSearchResponse = res;
     for(let i=0; i<data.obj.length; i++) {
-        let report = data.obj[i];
+        const report = data.obj[i];
       filteredReports.value.push({
           reportName: report.vulnerabilityName,
           reportId: report.cveId,
@@ -177,14 +163,54 @@ async function searchReports(keyword: string) {
   isLoading.value = false;
 }
 const debouncedSearch = debounce(async (query: string) => {
-  if (query) {
+  if ((query ?? '') !== '') {
     await searchReports(query);
-  } else {
-    filteredReports.value = [];
   }
 }, 500, isLoading); // 500ms debounce time
 
+
+// filter
+async function filterReports(riskLevel: string, startTime: string, endTime: string) {
+  if(!((riskLevel ?? '') !== '' || ((startTime ?? '') !== '' && (endTime ?? '') !== ''))) {
+    return;
+  }
+  isLoading.value = true;
+  const TIME_FORMAT = 'YYYY-MM-DD';
+  const formattedStartTime = startTime ? dayjs(startTime).format(TIME_FORMAT) : '';
+  const formattedEndTime = endTime ? dayjs(endTime).format(TIME_FORMAT) : '';
+  filteredReports.value = [];
+  await getFilteredVulnerabilityReport(riskLevel, formattedStartTime, formattedEndTime).then((res) => {
+    const data:VulnerabilityReportSearchResponse = res;
+    console.log(data);
+    for(let i=0; i<data.obj.length; i++) {
+        const report = data.obj[i];
+        filteredReports.value.push({
+            reportName: report.vulnerabilityName,
+            reportId: report.cveId,
+            time: report.disclosureTime,
+            riskLevel: report.riskLevel,
+            ref: report.referenceLink
+        });
+    }
+    console.log(filteredReports.value);
+  });
+  isLoading.value = false;
+}
+
+watch([selectedRiskLevel, selectedTime], ([riskLevel, time]) => {
+  if ((riskLevel ?? '') === '' && ((time[0] ?? '') === '' && (time[1] ?? '') === '')) {
+    return;
+  }
+  searchQuery.value = '';
+  filterReports(riskLevel, time[0], time[1]);
+});
+
 watch(searchQuery, (newQuery) => {
+  if ((newQuery ?? '') === '') {
+    return;
+  }
+  selectedRiskLevel.value = '';
+  selectedTime.value = '';
   debouncedSearch(newQuery);
 });
 

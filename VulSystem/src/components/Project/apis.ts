@@ -3,9 +3,9 @@ import instance from '@/utils/request.ts'
 export interface ProjectCreateResponse {
   code: number
   message: string
-  obj: any
+  obj: never
 
-  [property: string]: any
+  [property: string]: never
 }
 
 export const createProject = (project: FormData) => {
@@ -54,7 +54,7 @@ export interface ProjectListResponse {
   code: number
   message: string
   obj: Obj[]
-  [property: string]: any
+  [property: string]: never
 }
 
 export interface Obj {
@@ -71,7 +71,7 @@ export interface Obj {
    * 项目风险等级，高风险/低风险/暂无风险
    */
   risk_level: string
-  [property: string]: any
+  [property: string]: never
 }
 
 export const getProjectList = (page: number, size: number, companyId: number) => {
