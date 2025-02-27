@@ -24,13 +24,13 @@ const newProject = reactive<ProjectInfo>(props.project ??
   description: '',
   risk_level: '暂无风险',
   language: 'java',
-  companyId: 0, // TODO: change to real companyId
+  companyId: localStorage.getItem('companyId') ?? '',
   risk_threshold: 10,
   filePath: null
 })
 const formRef = ref(null);
 const currentFile = ref<File | null>(null);
-const fileUploadServerBaseURL = 'http://172.19.177.243:8080'; //TODO: change to real server address
+const fileUploadServerBaseURL = 'http://localhost:8080'; //TODO: change to real server address
 
 // form rules
 const rules = {

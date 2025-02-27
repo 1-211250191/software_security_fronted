@@ -41,7 +41,12 @@ const handleLogin = () => {
   api.login(username.value, passwd.value)
     .then(res => {
       console.log(res);
+      if(res.data.code !== 200) {
+        ElMessage.error(res.data.obj)
+        return
+      }
       localStorage.setItem('companyId', res.data.obj.companyId)
+      ElMessage.success('登录成功')
       router.push('/')
     })
     .catch(err => {

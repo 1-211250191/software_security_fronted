@@ -6,8 +6,15 @@
         <el-icon size="24">
           <User />
         </el-icon>
-        <div v-if="true" class="user-name" @click="handleLogin">登录/注册</div>
-        <div v-else class="user-name">用户XXX</div>
+        <div v-if="!isLogin" class="login" @click="handleLogin">登录/注册</div>
+        <div v-else class="user-name">
+          <span>
+            {{
+              '欢迎您，CompanyId: ' + companyId
+            }}
+          </span>
+          <span class="login" @click="handleLogout">退出登录</span>
+        </div>
       </div>
     </el-header>
     <el-container>
@@ -64,7 +71,7 @@ import {
   DataLine, Discount,
   User, Setting
 } from '@element-plus/icons-vue'
-import { computed } from 'vue'
+import {computed, ref, onMounted} from 'vue'
 import { useRoute } from 'vue-router'
 import LLMHelper from "@/components/LLMHelper/LLMHelper.vue";
 const route = useRoute();
@@ -87,6 +94,15 @@ const isLoginPage = computed(() => {
 const handleLogin = () => {
   router.push('/login')
 }
+const handleLogout = () => {
+  localStorage.removeItem('companyId')
+  router.push('/login')
+}
+const isLogin = computed(() => {
+  return localStorage.getItem('companyId') !== null
+})
+const companyId = ref('');
+
 interface NavTitle {
   index: string,
   uname: string,
@@ -127,6 +143,9 @@ const titles: NavTitle[] = [
   },
 ]
 
+onMounted(() => {
+  companyId.value = localStorage.getItem('companyId') || '';
+})
 </script>
 <style scoped>
 .home_container {
@@ -162,6 +181,10 @@ const titles: NavTitle[] = [
     padding-right: 20px;
 
     .user-name {
+      margin-left: 15px;
+    }
+
+    .login{
       margin-left: 15px;
       cursor: pointer;
     }
