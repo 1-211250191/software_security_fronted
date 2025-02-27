@@ -7,7 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AdviceCard: typeof import('./src/components/Danger/AdviceCard.vue')['default']
+    AdviceCard: typeof import('./src/components/Markdown/AdviceCard.vue')['default']
     Chart: typeof import('./src/components/chart/index.vue')['default']
     DangerCard: typeof import('./src/components/Danger/DangerCard.vue')['default']
     DangerList: typeof import('./src/components/Danger/DangerList.vue')['default']
@@ -55,6 +55,7 @@ declare module 'vue' {
     LLMHelperBody: typeof import('./src/components/LLMHelper/LLMHelperBody.vue')['default']
     LlmInfo: typeof import('./src/components/Optimize/LlmInfo.vue')['default']
     LoadingFrames: typeof import('./src/components/LoadingFrames.vue')['default']
+    MarkdownComponent: typeof import('./src/components/Markdown/MarkdownComponent.vue')['default']
     PInfo: typeof import('./src/components/Project/PInfo.vue')['default']
     ProjectForm: typeof import('./src/components/Project/ProjectForm.vue')['default']
     ReportList: typeof import('./src/components/Danger/ReportList.vue')['default']

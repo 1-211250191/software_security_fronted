@@ -21,8 +21,8 @@
       <DataSetting threshold-name="相似度阈值" :threshold="stratage?.similarityThreshold ?? 0.5"
         :K="stratage?.maxDetectNums ?? 1" @update:threshold="updateThreshold" @update:K="updateK" />
       <div class="llm-list">
-        <LlmInfo v-for="llm in llmList" :key="llm.llmName" :is-vip="stratage?.is_member == 1"
-          :is-chosen="llm.llmName == stratage?.detect_strategy" :info="llm" @update:name="updateStratageName" />
+        <LlmInfo v-for="llm in llmList" :key="llm.llmName" :is-vip="stratage?.isMember == 1"
+          :is-chosen="llm.llmName == stratage?.detectStrategy" :info="llm" @update:name="updateStratageName" />
       </div>
     </template>
   </DataCard>

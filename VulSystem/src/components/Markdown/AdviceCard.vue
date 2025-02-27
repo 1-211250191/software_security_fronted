@@ -32,7 +32,8 @@
 
     </template>
     <template #main>
-      <div class="section">
+      <MarkdownComponent :markdown="adviceCode" classname="advice-block" />
+      <!-- <div class="section">
         <h2>修复步骤: </h2>
         <ol class="fix-steps">
 
@@ -46,21 +47,16 @@
 
         <h2>相关代码：</h2>
         <pre class="code-block"><code>{{ adviceCode }}</code></pre>
-
-        <!-- <button @click="submitComment">提交评论</button> -->
-
-        <!-- <div v-if="submittedComment">
-          <h3>评论提交成功：</h3>
-          <p>{{ submittedComment }}</p>
-        </div> -->
-      </div>
+      </div> -->
     </template>
   </DataCard>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { DangerInfo } from './const';
+import { onMounted, ref } from 'vue';
+import type { DangerInfo } from '../Danger/const';
+import MarkdownComponent from './MarkdownComponent.vue';
+import { getSuggestion } from './service';
 
 const props = withDefaults(
   defineProps<{
@@ -72,7 +68,7 @@ const props = withDefaults(
 const modelName = ref<string>('GPT-4')
 const modelList = ['Deepseek', 'GPT-4', 'Gemini']
 
-const errCode = `
+const errCode = ref<string>(`
 static bool check_permission_for_set_tokenid(struct file *file)
 {
 	const struct cred *cred = get_task_cred(current);
@@ -87,28 +83,40 @@ static bool check_permission_for_set_tokenid(struct file *file)
 	    uid_eq(cred->uid, inode->i_uid)) {
 		return true;
 	}
-`
-const adviceCode = `
-static bool check_permission_for_set_tokenid(struct file *file)
+`)
+const adviceCode = ref<string>(`
+**修复建议**
+\`\`\`cpp
+static bool check_permission_for_set_tokenid(struct file * file)
 {
-	kuid_t uid = current_uid();
-	struct inode *inode = file->f_inode;
+    kuid_t uid = current_uid();
+    struct inode *inode = file-> f_inode;
 
-	if (inode == NULL) {
-		pr_err("%s: file inode is null\n", __func__);
-		return false;
-	}
-
-
-	if (uid_eq(uid, GLOBAL_ROOT_UID) ||
-	    uid_eq(uid, inode->i_uid)) {
-		return true;
-	}
-`
-const formatComment = (comment: string) => {
-  // 格式化代码块，中间添加换行符
-  return comment.split("\n").map(line => line.trim()).join("\n");
+if (inode == NULL) {
+  pr_err("%s: file inode is null\n", __func__);
+  return false;
 }
+if (uid_eq(uid, GLOBAL_ROOT_UID) ||
+  uid_eq(uid, inode -> i_uid)) {
+  return true;
+}
+\`\`\`
+`);
+
+const getAdvice = () => {
+  const requestList: [string, string, string, string?] = [props.info.name, props.info.description, modelName.value]
+  if (errCode.value != '') {
+    requestList.push(errCode.value)
+  }
+  getSuggestion(...requestList)
+    .then(res => {
+      adviceCode.value = res.data.obj.fix_advise
+    })
+}
+
+onMounted(() => {
+  getAdvice()
+},)
 </script>
 
 <style>
@@ -170,6 +178,20 @@ const formatComment = (comment: string) => {
   font-size: 14px;
   /* 字体大小 */
   color: #555557;
+}
+
+.advice-block {
+  pre {
+    margin-top: 16px;
+    padding: 25px;
+    background-color: #EEF0F4;
+    /* border: 1px solid #ccc; */
+    border-radius: 6px;
+    white-space: pre;
+    /* 保持换行符 */
+    font-family: monospace;
+    color: #727375;
+  }
 }
 
 .code-block {

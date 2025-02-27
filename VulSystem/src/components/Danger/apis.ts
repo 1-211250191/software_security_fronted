@@ -1,5 +1,4 @@
 import instance from '@/utils/request.ts'
-import axios from '@/utils/request'
 export interface VulnerabilityReportListResponse {
   code: number
   message: string
@@ -67,15 +66,5 @@ export const getVulnerabilityReportSearch = (keyword: string) => {
         console.error(err)
         reject(err)
       })
-  })
-}
-
-export const acceptVul = (vulnerabilityid: number, ifaccept: 1 | 2) => {
-  return axios.get('/vulnerability/accept', {
-    params: {
-      // vulnerabilityid,
-      vulnerabilityid,
-      ifaccept,
-    },
   })
 }

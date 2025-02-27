@@ -27,11 +27,11 @@ export interface CompanyStrategy {
    *
    * 检测策略：共十种(LLM,TinyModel,LLM-lev;TinyModel-lev,LLM-cos;TinyModel-cos,LLM-lcs;TinyModel-lcs,LLM-whiteList;TinyModel-whiteList)
    */
-  detect_strategy: string
+  detectStrategy: string
   /**
    * 是否会员
    */
-  is_member: number
+  isMember: number
   /**
    * 单位漏洞报告中检测出漏洞库的最大数量 1~3
    */
@@ -40,4 +40,5 @@ export interface CompanyStrategy {
    * 相似度阈值 0~1
    */
   similarityThreshold: number
+  [property: string]: number | string | null
 }

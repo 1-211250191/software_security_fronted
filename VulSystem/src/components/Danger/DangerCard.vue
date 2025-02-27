@@ -2,8 +2,8 @@
 import { computed, ref, watch } from 'vue';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import type { DangerInfo } from './const';
-import AdviceCard from './AdviceCard.vue';
-import { acceptVul } from './apis';
+import AdviceCard from '../Markdown/AdviceCard.vue';
+import { acceptVul } from '../Markdown/service';
 
 const props = withDefaults(
   defineProps<{

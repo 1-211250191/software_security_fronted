@@ -135,7 +135,7 @@ const option = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [0],
+      data: [2],
       itemStyle: {
         borderRadius: 5,
         // color: '#EE6666' // 设置颜色
@@ -155,7 +155,7 @@ const option = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [0],
+      data: [1],
       itemStyle: {
         borderRadius: 5, // Add rounded corners
         // color: '#fac858'
