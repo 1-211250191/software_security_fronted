@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-frame">
+  <div class="chat-frame" >
 
     <div class="chat-header">
       <h1>安全小助手</h1>
@@ -36,21 +36,41 @@
     </div>
 
     <!-- input -->
-    <div class="input-area">
-      <input
-        v-model="inputMessage"
-        type="text"
-        placeholder="请输入希望问小助手的问题..."
-        @keyup.enter="sendMessage"
-      >
-      <button class="send-button" @click="sendMessage">发送</button>
+    <div class="input-container">
+      <div class="model-selector">
+        <div class="model-selector-button" @click="showModelSelector = !showModelSelector" >
+          <span>{{selectedModel == '' ? '选择模型':selectedModel}}</span>
+          <div class="model-selector-icon" :class="showModelSelector ? 'open' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="assistant-icon">
+              <path d="M12 15l-6-6h12z" fill="currentColor"/>
+            </svg>
+          </div>
+
+        </div>
+        <div class="model-selector-options" v-show="showModelSelector">
+          <div v-for="option in modelOptions" :key="option.value" class="model-selector-option" @click="selectedModel = option.value; showModelSelector = false">
+            {{ option.label }}
+          </div>
+        </div>
+      </div>
+      <div class="input-area">
+        <input
+          v-model="inputMessage"
+          type="text"
+          placeholder="请输入希望问小助手的问题..."
+          @keyup.enter="sendMessage"
+        >
+        <button class="send-button" @click="sendMessage">发送</button>
+      </div>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {ref} from 'vue'
 import {Orange} from "@element-plus/icons-vue";
+import {queryLLM} from "@/components/LLMHelper/apis.ts";
 
 interface Message {
   content: string
@@ -71,6 +91,22 @@ const messages = ref<Message[]>([
     timestamp: Date.now()
   }
 ])
+const modelOptions = [
+  {
+    value: 'qwen',
+    label: 'qwen'
+  },
+  {
+    value: 'DeepSeek',
+    label: 'DeepSeek'
+  },
+  {
+    value: 'Llama',
+    label: 'Llama'
+  }
+]
+const selectedModel = ref('')
+const showModelSelector = ref(false)
 
 const sendMessage = () => {
   if (!inputMessage.value.trim()) return
@@ -82,27 +118,46 @@ const sendMessage = () => {
   }
 
   messages.value.push(newMessage)
+
+  // simulate assistant response
+  // setTimeout(() => {
+  //   const assistantResponse: Message = {
+  //     content: '我很乐意帮助您解决问题，请详细描述您遇到的情况。',
+  //     isAssistant: true,
+  //     timestamp: Date.now()
+  //   }
+  //   messages.value.push(assistantResponse)
+  // }, 1000)
+
+  // query assistant response
+  queryLLM(inputMessage.value, selectedModel.value == '选择模型' ? '':selectedModel.value).then((res) => {
+    console.log(res.data)
+    if(res.data.code !== 200) {
+      const assistantResponse: Message = {
+        content: '服务器繁忙，请稍后再试。',
+        isAssistant: true,
+        timestamp: Date.now()
+      }
+      messages.value.push(assistantResponse)
+      return
+    }
+    const assistantResponse: Message = {
+      content: res.data.obj.answer,
+      isAssistant: true,
+      timestamp: Date.now()
+    }
+    messages.value.push(assistantResponse)
+  })
+
+  // clear input
   inputMessage.value = ''
 
   //store only the last 10 messages
   if (messages.value.length > 10) {
     messages.value.shift()
   }
-
-  // simulate assistant response
-  setTimeout(() => {
-    const assistantResponse: Message = {
-      content: '我很乐意帮助您解决问题，请详细描述您遇到的情况。',
-      isAssistant: true,
-      timestamp: Date.now()
-    }
-    messages.value.push(assistantResponse)
-  }, 1000)
 }
 
-const closeChat = () => {
-  console.log('关闭聊天')
-}
 </script>
 
 <style scoped>
@@ -221,11 +276,93 @@ const closeChat = () => {
   color: #333;
 }
 
+.model-selector {
+  position: relative;
+  margin-left: 16px;
+  width: 125px;
+}
+
+.model-selector-button{
+  padding: 4px 12px;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  span{
+    font-weight: bold;
+    color: #1e1e1e;
+  }
+
+  .model-selector-icon{
+    width: 20px;
+    height: 20px;
+    fill: #1e1e1e;
+    transition: transform 0.4s;
+  }
+
+  .model-selector-icon.open {
+    transform: rotate(180deg);
+  }
+}
+
+.model-selector-button:hover {
+  background-color: #f5f5f5;
+  color: #3a3a3a;
+  transition: all 0.4s;
+}
+
+.model-selector-options {
+  width: 100%;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  animation: slide-down 0.4s;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.model-selector-option {
+  padding: 4px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 14px;
+  color: grey;
+  transition: background-color 0.4s;
+}
+
+.model-selector-option:hover {
+  background-color: #f5f5f5;
+}
+
+.input-container{
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  gap: 8px;
+}
+
 .input-area {
   display: flex;
   gap: 8px;
-  padding: 16px;
-  border-top: 1px solid #eee;
+  padding: 0 16px;
 }
 
 .input-area input {
