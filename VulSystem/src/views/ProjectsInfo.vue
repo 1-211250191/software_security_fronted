@@ -29,7 +29,7 @@
               </div>
             </template>
           </el-statistic>
-          <el-statistic :value="projectStatistic?.highRiskNum ?? 0 + (projectStatistic?.lowRiskNum ?? 0)"
+          <el-statistic :value="projectStatistic?.vulnerabilityNum"
             :value-style="{ fontSize: '36px', color: '#336fff' }">
             <template #title>
               <div style="display: inline-flex; align-items: center">
@@ -47,7 +47,7 @@
 
   <DataCard title="项目仓库" width="auto">
     <template #right>
-      <el-input style="width: 240px;margin-right: 20px;" placeholder="请输入仓库名">
+      <el-input style="width: 240px;margin-right: 20px;" placeholder="请输入仓库名" v-model="searchValue">
         <template #suffix>
           <el-icon>
             <Search />
@@ -60,9 +60,12 @@
       <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
         <LoadingFrames size="large"></LoadingFrames>
       </div>
-      <div v-else>
-        <PInfo v-for="info in projectInfos" :key="info.index" :project="info" @delete="handleDeleteProject"
+      <div v-else-if="filteredProjects.length > 0">
+        <PInfo v-for="info in filteredProjects" :key="info.index" :project="info" @delete="handleDeleteProject"
           @edit="handleEditProject" />
+      </div>
+      <div v-else>
+        <el-empty description="暂无项目"></el-empty>
       </div>
     </template>
   </DataCard>
@@ -79,7 +82,7 @@ import DataCard from '@/components/DataCard.vue';
 import WChart from '@/components/chart/index.vue'
 import PInfo from '@/components/Project/PInfo.vue';
 import { type ProjectInfo } from '@/components/Project/const';
-import { onMounted, ref } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import ProjectForm from '@/components/Project/ProjectForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
@@ -190,6 +193,7 @@ const option = ref({
   ]
 });
 
+// project modification
 const addFormVisible = ref(false)
 const handleAddProject = (newProject: ProjectInfo) => {
   console.log(newProject);
@@ -208,7 +212,6 @@ const handleAddProject = (newProject: ProjectInfo) => {
       })
     }
   });
-
   addFormVisible.value = false;
 }
 
@@ -274,6 +277,20 @@ const isLoading = ref(true);
 
 // project list
 const projectInfos = ref<ProjectInfo[]>([]);
+const searchValue = ref('')
+const filteredProjects = ref<ProjectInfo[]>([]);
+
+const filterProjects = () => {
+  if ((searchValue.value ?? '') === '') {
+    filteredProjects.value = projectInfos.value;
+    return;
+  }
+  filteredProjects.value = projectInfos.value.filter((project) => {
+    return project.name.includes(searchValue.value);
+  });
+}
+watch(searchValue, filterProjects);
+
 async function getProjects(companyId: number) {
   isLoading.value = true;
   const page = 1;
@@ -295,14 +312,19 @@ async function getProjects(companyId: number) {
 
   isLoading.value = false;
 }
+
+
+// project statistic
 const projectStatistic = ref<StatisticsInfo>()
-onMounted(() => {
+onMounted(async () => {
   const companyId = 1; // mock data, should be replaced by real data
-  getProjects(companyId);
+  await getProjects(companyId);
+  filterProjects();
   // 获取统计信息
   getCompanyStatic()
     .then(res => {
       const statistics: StatisticsInfo = res.data.obj
+      console.log('statistics:', statistics);
       projectStatistic.value = statistics
       // 项目风险等级分布
       const newOptionSeries = [
@@ -343,7 +365,7 @@ onMounted(() => {
           itemStyle: {
             borderRadius: 5, // Add rounded corners
             // color: '#fac858'
-            color: '#e3ebff',
+            color: '#2967ff',
           },
           barMinHeight: 5, // 设置柱子的最小高度
           // z: 2,
@@ -364,7 +386,7 @@ onMounted(() => {
           itemStyle: {
             borderRadius: 5, // Add rounded corners
             // color: '#91cc75'
-            color: '#336fff',
+            color: '#1c9a00',
           },
           barCategoryGap: '30%', // 设置柱状图之间的间隔
           barMinHeight: 50, // 设置柱子的最小高度

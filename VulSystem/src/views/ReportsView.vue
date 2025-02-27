@@ -181,6 +181,7 @@ async function filterReports(riskLevel: string, startTime: string, endTime: stri
   filteredReports.value = [];
   await getFilteredVulnerabilityReport(riskLevel, formattedStartTime, formattedEndTime).then((res) => {
     const data:VulnerabilityReportSearchResponse = res;
+    console.log(data);
     for(let i=0; i<data.obj.length; i++) {
         const report = data.obj[i];
         filteredReports.value.push({
