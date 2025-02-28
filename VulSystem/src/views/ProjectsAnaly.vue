@@ -18,7 +18,16 @@
     <!-- <v-chart ref="mychart1" class="chart"></v-chart> -->
     <DataCard title="待解决项目">
       <template #main>
-        <PInfo v-for="info in dangerProjectInfos" :key="info.index" :project="info" :canEdit="false" />
+        <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
+          <LoadingFrames size="large"></LoadingFrames>
+        </div>
+        <template v-else-if="dangerProjectInfos.length > 0">
+          <PInfo v-for="info in dangerProjectInfos" :key="info.id" :project="info" :canEdit="false" />
+        </template>
+        <template v-else>
+          <el-empty description="暂无待解决项目"></el-empty>
+        </template>
+
       </template>
     </DataCard>
     <div class="right-info">
@@ -65,13 +74,15 @@ import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
 import PInfo from '@/components/Project/PInfo.vue';
 import { type ProjectInfo } from '@/components/Project/const';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getCompanyStatic, type StatisticsInfo } from '@/components/Statistic/const';
+import { ElMessage } from 'element-plus';
+import { getVulProjectList } from '@/components/Project/apis';
 defineProps<{
   project: string
 }>();
 
-const dangerProjectInfos = reactive<ProjectInfo[]>([
+const dangerProjectInfos = ref<ProjectInfo[]>([
 ]);
 const dangerChangeOption = ref({
   tooltip: {
@@ -107,7 +118,7 @@ const dangerChangeOption = ref({
       type: 'line',
       // stack: 'Total',
       smooth: true,
-      data: [12, 13, 10, 13, 9, 15, 21],
+      data: [0, 0, 0, 0, 0, 0, 0],
       itemStyle: {
         color: '#f5800c',
       }
@@ -117,7 +128,7 @@ const dangerChangeOption = ref({
       type: 'line',
       // stack: 'Total',
       smooth: true,
-      data: [2, 18, 19, 15, 29, 33, 31],
+      data: [0, 0, 0, 0, 0, 0, 0],
       itemStyle: {
         color: '#fac858',
       }
@@ -127,7 +138,7 @@ const dangerChangeOption = ref({
       type: 'line',
       // stack: 'Total',
       smooth: true,
-      data: [15, 45, 10, 5, 19, 20, 41],
+      data: [0, 0, 0, 0, 0, 0, 0],
       itemStyle: {
         color: '#91cc75',
       }
@@ -203,9 +214,28 @@ const getVulChangeData = (level: 'high' | 'mid' | 'low', statistic: StatisticsIn
   return data
 }
 
+const isLoading = ref<boolean>(false)
+
+const getProjects = () => {
+  isLoading.value = true;
+
+  getVulProjectList()
+    .then(res => {
+      dangerProjectInfos.value = res
+    }).catch((err) => {
+      console.log(err);
+      ElMessage.error('获取项目列表失败');
+    }).finally(() => {
+      isLoading.value = false;
+    })
+
+
+}
+
 const thirdLibraryNum = ref<number>(0)
 const vulNum = ref<number>(0)
 onMounted(() => {
+  getProjects()
   getCompanyStatic()
     .then(res => {
       const statistics: StatisticsInfo = res.data.obj

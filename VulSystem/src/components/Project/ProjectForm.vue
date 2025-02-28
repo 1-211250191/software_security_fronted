@@ -19,7 +19,7 @@ const emit = defineEmits(['cancel', 'confirm']);
 const dialogVisible = ref(props.visible);
 const newProject = reactive<ProjectInfo>(props.project ??
 {
-  index: 0,
+  id: 0,
   name: '',
   description: '',
   risk_level: '暂无风险',
@@ -28,7 +28,7 @@ const newProject = reactive<ProjectInfo>(props.project ??
   risk_threshold: 10,
   filePath: null
 })
-const formRef = ref(null);
+const formRef = ref<FormInstance>();
 const currentFile = ref<File | null>(null);
 const fileUploadServerBaseURL = 'http://localhost:8080'; //TODO: change to real server address
 
@@ -128,15 +128,9 @@ watch(() => props.project, (project) => {
       </el-form-item>
       <el-form-item label="项目文件" prop="filePath" v-if="type == 'add'">
         <div class="upload-file-container">
-          <el-upload
-            ref="uploader"
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :show-file-list="false"
-            :multiple="false"
-            :action="fileUploadServerBaseURL + '/project/uploadFile'"
-            :on-success="handleFileUploadSuccess"
-          >
+          <el-upload ref="uploader" :auto-upload="false" :on-change="handleFileChange" :show-file-list="false"
+            :multiple="false" :action="fileUploadServerBaseURL + '/project/uploadFile'"
+            :on-success="handleFileUploadSuccess">
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
               <el-tooltip content="上传项目依赖文件或编译后的二进制文件。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
@@ -148,7 +142,8 @@ watch(() => props.project, (project) => {
           </el-upload>
           <div v-if="currentFile" class="selected-file">
             <span>已选择文件: {{ currentFile.name }}</span>
-            <el-button type="danger" size="small" @click="removeFile" class="remove-button" v-if="newProject.filePath == null">移除</el-button>
+            <el-button type="danger" size="small" @click="removeFile" class="remove-button"
+              v-if="newProject.filePath == null">移除</el-button>
             <el-button type="primary" size="small" @click="uploadFile" v-if="newProject.filePath == null">上传</el-button>
             <div class="upload-success" v-if="newProject.filePath != null">上传成功！</div>
           </div>

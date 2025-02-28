@@ -52,7 +52,12 @@
   </DataCard>
   <DataCard title="问题列表" width="auto">
     <template #main>
-      <DangerCard v-for="danger in dangerList" :key="danger.id" :info="danger" />
+      <template v-if="dangerList.length > 0">
+        <DangerCard v-for="danger in dangerList" :key="danger.id" :info="danger" />
+      </template>
+      <template v-else>
+        <el-empty description="该项目暂未检测到问题"></el-empty>
+      </template>
     </template>
   </DataCard>
 </template>

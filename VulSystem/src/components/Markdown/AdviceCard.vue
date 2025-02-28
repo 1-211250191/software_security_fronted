@@ -11,28 +11,63 @@
           <h2>漏洞描述: </h2>
           <p>{{ info.description }}</p>
         </div>
-
         <h2>相关代码: </h2>
-        <pre class="code-block"><code>{{ errCode }}</code></pre>
+        <!-- 编辑代码，发送请求 -->
+        <!-- <div class="line" style="justify-content: space-between;">
+          <div class="operation">
+            <el-button type="primary">确认搜索</el-button>
+
+            <el-button type="primary" :icon="Edit" text title="编辑代码" />
+            <el-button type="primary" :icon="Search" color="#336fff">确认搜索</el-button>
+
+          </div>
+        </div> -->
+        <div class="code-block">
+          <el-input v-model="errCode" :autosize="{ minRows: 4, maxRows: 20 }" type="textarea"
+            placeholder="请输入相关代码，以便模型更好地帮助修复" resize="none" />
+        </div>
+
+        <div class="line" style="justify-content: end; margin-top: 10px;">
+          <el-button type="primary" @click="getAdvice">确认搜索</el-button>
+          <!-- <div class="operation"> -->
+
+          <!-- <template v-if="inEdit">
+
+            </template> -->
+          <!-- <el-button v-else type="primary" :icon="Edit" text title="编辑代码" /> -->
+          <!-- <el-button type="primary" :icon="Search" color="#336fff">确认搜索</el-button> -->
+          <!-- </div> -->
+        </div>
+
+        <!-- <pre class="code-block"><code>
+
+        </code></pre> -->
+
 
         <!-- <button @click="submitComment">提交评论</button> -->
-
-        <!-- <div v-if="submittedComment">
-          <h3>评论提交成功：</h3>
-          <p>{{ submittedComment }}</p>
-        </div> -->
       </div>
     </template>
   </DataCard>
   <DataCard title="建议" width="auto" class="advice">
     <template #right>
-      <el-select v-model="modelName" placeholder="Select" style="width: 240px">
+      <el-select v-model="modelName" placeholder="Select" style="width: 240px" @change="getAdvice">
         <el-option v-for="item in modelList" :key="item" :label="item" :value="item" />
       </el-select>
 
     </template>
     <template #main>
-      <MarkdownComponent :markdown="adviceCode" classname="advice-block" />
+      <div class="section">
+        <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
+          <LoadingFrames size="large"></LoadingFrames>
+        </div>
+        <div v-else-if="adviceCode != ''">
+          <MarkdownComponent :markdown="adviceCode" classname="advice-block" />
+        </div>
+        <div v-else>
+          <el-empty description="抱歉，未能获取到修复建议，请重新尝试"></el-empty>
+        </div>
+
+      </div>
       <!-- <div class="section">
         <h2>修复步骤: </h2>
         <ol class="fix-steps">
@@ -54,9 +89,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+// import { Edit, Search } from '@element-plus/icons-vue'
 import type { DangerInfo } from '../Danger/const';
 import MarkdownComponent from './MarkdownComponent.vue';
 import { getSuggestion } from './service';
+import { ElMessage } from 'element-plus';
 
 const props = withDefaults(
   defineProps<{
@@ -65,9 +102,10 @@ const props = withDefaults(
   {
   }
 );
-const modelName = ref<string>('GPT-4')
-const modelList = ['Deepseek', 'GPT-4', 'Gemini']
+const modelName = ref<string>('qwen')
+const modelList = ['Deepseek', 'Llama', 'qwen']
 
+const isLoading = ref<boolean>(true)
 const errCode = ref<string>(`
 static bool check_permission_for_set_tokenid(struct file *file)
 {
@@ -104,6 +142,7 @@ if (uid_eq(uid, GLOBAL_ROOT_UID) ||
 `);
 
 const getAdvice = () => {
+  isLoading.value = true
   const requestList: [string, string, string, string?] = [props.info.name, props.info.description, modelName.value]
   if (errCode.value != '') {
     requestList.push(errCode.value)
@@ -111,6 +150,14 @@ const getAdvice = () => {
   getSuggestion(...requestList)
     .then(res => {
       adviceCode.value = res.data.obj.fix_advise
+    })
+    .catch(err => {
+      adviceCode.value = ''
+      ElMessage.error('未能成功获取到修复建议')
+      console.log(`获取修复建议出错: ${err}`)
+    })
+    .finally(() => {
+      isLoading.value = false;
     })
 }
 
@@ -120,8 +167,9 @@ onMounted(() => {
 </script>
 
 <style>
-.advice {
-  margin: 0 !important;
+.el-dialog .advice {
+  margin-bottom: -10px;
+  padding-bottom: 0px;
 
   .card-header {
     .card-title {
@@ -141,7 +189,7 @@ onMounted(() => {
 
   .line {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     margin-bottom: 5px;
   }
 
@@ -153,6 +201,7 @@ onMounted(() => {
   }
 
   p {
+    flex: 1;
     color: #555557;
   }
 }

@@ -1,5 +1,5 @@
 import instance from '@/utils/request.ts'
-import axios from 'axios'
+import { AxiosError, type AxiosResponse } from 'axios'
 
 export interface VulnerabilityReportListResponse {
   code: number

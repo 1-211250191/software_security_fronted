@@ -51,11 +51,11 @@ const statusTag = computed(() => {
 })
 console.log('测试问题列表')
 // 本地响应式变量
-const localAccept = ref(props.info.isaccept); // 初始化本地值
+const localAccept = ref<boolean>(props.info.isaccept == 1); // 初始化本地值
 
 // 监听 modelValue 的变化，以保持 localAccept 同步
 watch(() => props.info.isaccept, (newValue) => {
-  localAccept.value = newValue;
+  localAccept.value = newValue == 1;
 });
 
 const dialogVisible = ref<boolean>(false)
