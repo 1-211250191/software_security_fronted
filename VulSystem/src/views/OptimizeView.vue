@@ -34,14 +34,14 @@
 <script setup lang="ts">
 import { ArrowRight, Setting, InfoFilled } from '@element-plus/icons-vue'
 import DataCard from '@/components/DataCard.vue';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import DataSetting from '@/components/Optimize/DataSetting.vue';
 import LlmInfo from '@/components/Optimize/LlmInfo.vue';
 import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
 import { ElMessage } from 'element-plus';
 import { changeStrategy, getStrategy } from '@/components/Optimize/service';
 // const chosenLlmName = ref<string>('VulLibMiner')
-const llmList = reactive<LlmInfoType[]>([
+const llmList = ref<LlmInfoType[]>([
   {
     llmName: 'TinyModel',
     desc: '利用tf-idf打分算法结合基于bert的TinyModel方法进行检测，能够高效识别常见漏洞。',
@@ -137,16 +137,29 @@ const updateK = (value: number) => {
     changeStratage()
   }
 };
+// 监听 detectStrategy 的变化
+watch(
+  () => stratage.value?.detectStrategy,
+  (newValue) => {
+    // 将对应策略放到最前面
+    const index = llmList.value.findIndex(item => item.llmName === newValue);
+    if (index !== -1) {
+      const [itemToMove] = llmList.value.splice(index, 1); // 删除原数组中的该项
+      llmList.value.unshift(itemToMove); // 将删除的项插入数组最前面
+    }
+  },
+  { immediate: true } // 立即执行一次，确保初始状态正确
+);
 
 const updateStratageName = (value: string) => {
   if (stratage.value) {
     stratage.value.detectStrategy = value
     // 将对应策略放到最前面
-    const index = llmList.findIndex(item => item.llmName === value);
-    if (index !== -1) {
-      const [itemToMove] = llmList.splice(index, 1); // 删除原数组中的该项
-      llmList.unshift(itemToMove); // 将删除的项插入数组最前面
-    }
+    // const index = llmList.findIndex(item => item.llmName === value);
+    // if (index !== -1) {
+    //   const [itemToMove] = llmList.splice(index, 1); // 删除原数组中的该项
+    //   llmList.unshift(itemToMove); // 将删除的项插入数组最前面
+    // }
     changeStratage()
   }
 }

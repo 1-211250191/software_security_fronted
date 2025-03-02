@@ -11,12 +11,10 @@ export const acceptVul = (vulnerabilityid: number, ifaccept: 1 | 2) => {
 }
 
 export const getSuggestion = (name: string, desc: string, model: string, code?: string) => {
-  return axios.get('/openai/repair/suggestion', {
-    params: {
-      vulnerability_name: name,
-      vulnerability_desc: desc,
-      related_code: code,
-      model,
-    },
+  return axios.post('/llm/repair/suggestion', {
+    vulnerability_name: name,
+    vulnerability_desc: desc,
+    related_code: code,
+    model,
   })
 }
