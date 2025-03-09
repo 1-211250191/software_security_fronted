@@ -61,7 +61,7 @@
         <LoadingFrames size="large"></LoadingFrames>
       </div>
       <div v-else-if="filteredProjects.length > 0">
-        <PInfo v-for="info in filteredProjects" :key="info.index" :project="info" @delete="handleDeleteProject"
+        <PInfo v-for="info in filteredProjects" :key="info.id" :project="info" @delete="handleDeleteProject"
           @edit="handleEditProject" />
       </div>
       <div v-else>
@@ -281,13 +281,19 @@ const searchValue = ref('')
 const filteredProjects = ref<ProjectInfo[]>([]);
 
 const filterProjects = () => {
+  console.log("1projectInfos.value", projectInfos.value);
+  console.log("1filtered",filteredProjects.value);
   if ((searchValue.value ?? '') === '') {
     filteredProjects.value = projectInfos.value;
     return;
   }
   filteredProjects.value = projectInfos.value.filter((project) => {
-    return project.name.includes(searchValue.value);
+    if(project.name?.includes(searchValue.value ?? '')) {
+      return true;
+    }
   });
+  console.log("projectInfos.value", projectInfos.value);
+  console.log("filtered",filteredProjects.value);
 }
 watch(searchValue, filterProjects);
 
@@ -317,7 +323,7 @@ async function getProjects(companyId: number) {
 // project statistic
 const projectStatistic = ref<StatisticsInfo>()
 onMounted(async () => {
-  const companyId = 1; // mock data, should be replaced by real data
+  const companyId = localStorage.getItem('companyId');
   await getProjects(companyId);
   filterProjects();
   // 获取统计信息
