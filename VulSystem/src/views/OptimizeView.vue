@@ -98,7 +98,7 @@ const llmList = ref<LlmInfoType[]>([
     accuracy: 0.92,
     falseRate: 0.01,
     infoTag: '准确率较高',
-    // needVip: true,
+    needVip: true,
   },
   {
     llmName: 'TinyModel-whiteList',

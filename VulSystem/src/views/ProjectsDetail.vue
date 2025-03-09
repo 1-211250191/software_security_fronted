@@ -53,7 +53,7 @@
   <DataCard title="问题列表" width="auto">
     <template #main>
       <template v-if="dangerList.length > 0">
-        <DangerCard v-for="danger in dangerList" :key="danger.id" :info="danger" />
+        <DangerCard v-for="danger in dangerList" :key="danger.id" :info="danger" @refresh="getProjectDetail" />
       </template>
       <template v-else>
         <el-empty description="该项目暂未检测到问题"></el-empty>
@@ -66,8 +66,8 @@
 import { ArrowRight, Search, DocumentCopy } from '@element-plus/icons-vue'
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
-import { ProjectStatus, type ProjectInfoDetail } from '@/components/Project/const';
-import { onMounted, reactive, ref } from 'vue';
+import { type ProjectInfoDetail } from '@/components/Project/const';
+import { onMounted, ref } from 'vue';
 import type { DangerInfo } from '@/components/Danger/const';
 import { api } from './service';
 import DangerCard from '@/components/Danger/DangerCard.vue';
@@ -143,7 +143,8 @@ const option = ref({
     }
   ]
 });
-onMounted(() => {
+
+const getProjectDetail = () => {
   api.getProjectDetail(props.projectId)
     .then(res => {
       projectInfo.value = res.data.obj
@@ -198,6 +199,9 @@ onMounted(() => {
       console.log(option.value)
 
     })
+}
+onMounted(() => {
+  getProjectDetail()
   api.getVulList(props.projectId)
     .then(res => {
       dangerList.value = res.data.obj
