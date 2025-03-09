@@ -190,7 +190,7 @@ const languageOption = ref({
         { value: 0, name: 'Java' },
         { value: 0, name: 'C++' },
         // { value: 580, name: 'Go' },
-        { value: 0, name: '其它' }
+        // { value: 0, name: '其它' }
       ]
     }
   ]
@@ -247,14 +247,14 @@ onMounted(() => {
 
 
       // 修改语言饼状图配置
-      const otherLanguage = vulnerabilityNum - statistics.javaVulnerabilityNum - statistics.cVulnerabilityNum
+      // const otherLanguage = vulnerabilityNum - statistics.javaVulnerabilityNum - statistics.cVulnerabilityNum
       const newLanguageSeries = [{
         ...languageOption.value.series[0],
         data: [
           { value: statistics.javaVulnerabilityNum, name: 'Java' },
           { value: statistics.cVulnerabilityNum, name: 'C/C++' },
           // { value: 580, name: 'Go' },
-          { value: otherLanguage, name: '其它' }
+          // { value: otherLanguage, name: '其它' }
         ]
       }]
       languageOption.value = {
