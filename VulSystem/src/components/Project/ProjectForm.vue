@@ -59,6 +59,10 @@ function handleFileChange(file) {
     ElMessage.error('文件大小不能超过100MB')
     return
   }
+  if(file.raw.type !== 'application/zip' && file.raw.type !== 'application/x-7z-compressed' && file.raw.type !== 'application/x-tar') {
+    ElMessage.error('文件格式不支持，请上传 zip/7z/tar 格式的文件')
+    return
+  }
   currentFile.value = file.raw;
   console.log("已选择文件: ", currentFile.value)
 }
@@ -133,7 +137,7 @@ watch(() => props.project, (project) => {
             :on-success="handleFileUploadSuccess">
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
-              <el-tooltip content="上传项目依赖文件或编译后的二进制文件。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
+              <el-tooltip content="上传项目压缩包，支持 zip/7z/tar 等格式。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
                 <el-icon class="question-icon">
                   <QuestionFilled />
                 </el-icon>
