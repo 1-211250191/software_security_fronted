@@ -1,7 +1,7 @@
 <template>
   <el-breadcrumb :separator-icon="ArrowRight" class="bread">
     <el-breadcrumb-item :to="{ path: '/users' }">
-      <el-icon size="14">
+      <el-icon color="#336FFF" size="14">
         <Discount />
       </el-icon>
       <span class="bread-item">用户中心</span>
@@ -12,10 +12,11 @@
       <div class="user-name">
         <div class="user-icon">
           <el-icon>
-            <UserFilled />
+            <User />
+            <!-- <UserFilled /> -->
           </el-icon>
         </div>
-        <h4>用户名</h4>
+        <h4>用户xxx</h4>
       </div>
       <div class="user-infos">
         <div class="info">
@@ -65,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, Discount, UserFilled } from '@element-plus/icons-vue'
+import { ArrowRight, Discount, User } from '@element-plus/icons-vue'
 import DataCard from '@/components/DataCard.vue';
 import { onMounted, reactive, ref, watch } from 'vue';
 
@@ -106,7 +107,9 @@ onMounted(() => {
   margin: 20px 10px;
 
   .user-icon {
+    /* color: #336fff; */
     color: #fff;
+    /* border: 1px solid #8b8c8d; */
     display: flex;
     align-items: center;
     justify-content: center;

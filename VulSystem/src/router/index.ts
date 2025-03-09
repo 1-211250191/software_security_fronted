@@ -35,7 +35,7 @@ const router = createRouter({
     },
     {
       path: '/users',
-      name: '应用优化',
+      name: '用户中心',
       component: () => import('../views/UserView.vue'),
     },
     {
