@@ -15,7 +15,7 @@ const props = defineProps<{
     <thead>
     <tr>
       <th class="id">漏洞 ID</th>
-      <th class="name">漏洞名称</th>
+      <th class="name">漏洞描述</th>
       <th class="time">披露时间</th>
       <th class="level">风险等级</th>
       <th class="ref">报告来源</th>
