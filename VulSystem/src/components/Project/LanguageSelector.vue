@@ -10,8 +10,7 @@ const emit = defineEmits(['select']);
 
 const tabs: Tab[] = [
   { id: 'java', name: 'Java' },
-  { id: 'cpp', name: 'C++' },
-  { id: 'c', name: 'C' }
+  { id: 'cpp', name: 'C/C++' },
 ]
 
 const selectedTab = ref<string>('java')
