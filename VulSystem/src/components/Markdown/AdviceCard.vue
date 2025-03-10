@@ -106,40 +106,27 @@ const modelName = ref<string>('qwen')
 const modelList = ['Deepseek', 'Llama', 'qwen']
 
 const isLoading = ref<boolean>(true)
-const errCode = ref<string>(`
-static bool check_permission_for_set_tokenid(struct file *file)
-{
-	const struct cred *cred = get_task_cred(current);
-	struct inode *inode = file->f_inode;
+const errCode = ref<string>('')
+const adviceCode = ref<string>(
+  `
+  **修复建议**
+  \`\`\`cpp
+  static bool check_permission_for_set_tokenid(struct file * file)
+  {
+      kuid_t uid = current_uid();
+      struct inode *inode = file-> f_inode;
 
-	if (inode == NULL) {
-		pr_err("%s: file inode is null\n", __func__);
-		return false;
-	}
-
-	if (uid_eq(cred->uid, GLOBAL_ROOT_UID) ||
-	    uid_eq(cred->uid, inode->i_uid)) {
-		return true;
-	}
-`)
-const adviceCode = ref<string>(`
-**修复建议**
-\`\`\`cpp
-static bool check_permission_for_set_tokenid(struct file * file)
-{
-    kuid_t uid = current_uid();
-    struct inode *inode = file-> f_inode;
-
-if (inode == NULL) {
-  pr_err("%s: file inode is null\n", __func__);
-  return false;
-}
-if (uid_eq(uid, GLOBAL_ROOT_UID) ||
-  uid_eq(uid, inode -> i_uid)) {
-  return true;
-}
-\`\`\`
-`);
+  if (inode == NULL) {
+    pr_err("%s: file inode is null\n", __func__);
+    return false;
+  }
+  if (uid_eq(uid, GLOBAL_ROOT_UID) ||
+    uid_eq(uid, inode -> i_uid)) {
+    return true;
+  }
+  \`\`\`
+  `
+);
 
 const getAdvice = () => {
   isLoading.value = true
@@ -152,7 +139,7 @@ const getAdvice = () => {
       adviceCode.value = res.data.obj.fix_advise
     })
     .catch(err => {
-      adviceCode.value = ''
+      // adviceCode.value = ''
       ElMessage.error('未能成功获取到修复建议')
       console.log(`获取修复建议出错: ${err}`)
     })
