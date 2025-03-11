@@ -43,13 +43,13 @@ import { changeStrategy, getStrategy } from '@/components/Optimize/service';
 const llmList = ref<LlmInfoType[]>([
   {
     llmName: 'TinyModel',
-    desc: '利用tf-idf打分算法结合基于bert的TinyModel方法进行检测，能够高效识别常见漏洞。',
+    desc: '利用TF-IDF打分算法结合基于BERT-FNN的TinyModel方法进行检测，能够高效识别常见漏洞。',
     accuracy: 0.75,
     falseRate: 0.03
   },
   {
     llmName: 'LLM',
-    desc: '在TinyModel的识别基础上，使用大型语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
+    desc: '在TinyModel的识别基础上，使用大语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
     accuracy: 0.85,
     falseRate: 0.01
   },
@@ -93,7 +93,7 @@ const llmList = ref<LlmInfoType[]>([
   },
   {
     llmName: 'LLM-whiteList',
-    desc: '定制化训练的大模型，基于您的企业白名单进行训练，确保高准确率。',
+    desc: '在LLM检测的流程中，定制化添加您的企业白名单，确保高准确率。通过阈值过滤的方式降低误报率。',
     accuracy: 0.92,
     falseRate: 0.01,
     infoTag: '准确率较高',
@@ -101,7 +101,7 @@ const llmList = ref<LlmInfoType[]>([
   },
   {
     llmName: 'TinyModel-whiteList',
-    desc: '定制化训练的bert模型，基于您的企业白名单进行训练，确保高准确率。',
+    desc: '在TinyModel检测的流程中，定制化添加您的企业白名单，确保高准确率。通过阈值过滤的方式降低误报率。',
     accuracy: 0.83,
     falseRate: 0.02,
     infoTag: '准确率较高',
