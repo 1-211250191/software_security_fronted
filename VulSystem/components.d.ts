@@ -9,8 +9,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     AdviceCard: typeof import('./src/components/Markdown/AdviceCard.vue')['default']
     Chart: typeof import('./src/components/chart/index.vue')['default']
-    DangerCard: typeof import('./src/components/Danger/DangerCard.vue')['default']
-    DangerList: typeof import('./src/components/Danger/DangerList.vue')['default']
+    DangerCard: typeof import('./src/components/ProjectsDetail/DangerCard.vue')['default']
+    DangerList: typeof import('./src/components/ProjectsDetail/DangerList.vue')['default']
     DataCard: typeof import('./src/components/DataCard.vue')['default']
     DataSetting: typeof import('./src/components/Optimize/DataSetting.vue')['default']
     EditableField: typeof import('./src/components/Optimize/EditableField.vue')['default']
@@ -34,6 +34,8 @@ declare module 'vue' {
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
+    ElRadio: typeof import('element-plus/es')['ElRadio']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSlider: typeof import('element-plus/es')['ElSlider']
     ElStatistic: typeof import('element-plus/es')['ElStatistic']
@@ -62,5 +64,6 @@ declare module 'vue' {
     ReportListTable: typeof import('./src/components/Danger/ReportListTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SbomForm: typeof import('./src/components/ProjectsDetail/SbomForm.vue')['default']
   }
 }

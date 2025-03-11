@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { Edit, Delete, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
-import type { DangerInfo } from './const';
+import type { DangerInfo } from '../Danger/const';
 import AdviceCard from '../Markdown/AdviceCard.vue';
 import { acceptVul } from '../Markdown/service';
 

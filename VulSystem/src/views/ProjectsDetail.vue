@@ -35,19 +35,25 @@
   </div>
   <DataCard title="组件分析" width="auto">
     <template #right>
-      <el-input style="width: 240px;margin-right: 20px;" placeholder="请输入组件名称">
+      <!-- <el-input style="width: 240px;margin-right: 20px;" placeholder="请输入组件名称">
         <template #suffix>
           <el-icon>
             <Search />
           </el-icon>
         </template>
-      </el-input>
-      <el-button type="primary" color="#336fff">导出SBOM</el-button>
+  </el-input> -->
+      <SbomForm :project-name="projectInfo?.projectName || ''" :project-id="projectInfo?.id || 1" />
     </template>
     <template #main>
-      <div class="tree-container">
-        <el-tree :data="data" node-key="id" default-expand-all :props="{ class: 'custom-node' }" />
+      <div v-if="isTreeLoading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
+        <LoadingFrames size="large"></LoadingFrames>
       </div>
+      <template v-else>
+        <div class="tree-container">
+          <el-tree :data="treeData" node-key="id" default-expand-all :props="{ class: 'custom-node' }" />
+        </div>
+      </template>
+
     </template>
   </DataCard>
   <DataCard title="问题列表" width="auto">
@@ -63,14 +69,19 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, Search, DocumentCopy } from '@element-plus/icons-vue'
+import { ArrowRight, DocumentCopy } from '@element-plus/icons-vue'
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
+import SbomForm from '@/components/ProjectsDetail/SbomForm.vue';
 import { type ProjectInfoDetail } from '@/components/Project/const';
 import { onMounted, ref } from 'vue';
 import type { DangerInfo } from '@/components/Danger/const';
 import { api } from './service';
-import DangerCard from '@/components/Danger/DangerCard.vue';
+import DangerCard from '@/components/ProjectsDetail/DangerCard.vue';
+import { getSbomFile } from '@/components/ProjectsDetail/service';
+import type { SbomItem } from '@/components/ProjectsDetail/const';
+import { fa } from 'element-plus/es/locales.mjs';
+import { ElMessage } from 'element-plus';
 const props = defineProps<{
   projectId: number
 }>();
@@ -200,8 +211,67 @@ const getProjectDetail = () => {
 
     })
 }
+
+// 转换函数
+const convertSbomToTree = (sbomItems: SbomItem[]): Tree[] => {
+  return sbomItems.map(item => {
+    // 创建 Tree 对象
+    const treeItem: Tree = {
+      id: item.id,
+      label: item.name,
+      children: item.children ? convertSbomToTree(item.children) : undefined // 如果有 children，则递归转换
+    };
+    return treeItem;
+  });
+};
+
+interface Tree {
+  id: string
+  label: string
+  children?: Tree[]
+}
+
+const treeData = ref<Tree[]>()
+const isTreeLoading = ref<boolean>(false)
 onMounted(() => {
   getProjectDetail()
+
+  isTreeLoading.value = true
+  getSbomFile(props.projectId, '.json', 'sbom')
+    .then(res => {
+      // 创建一个FileReader来读取Blob
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        try {
+          // 读取结果为文本
+          const text = event.target?.result;
+          if (text) {
+            // 解析为JSON对象
+            const sbomItem: SbomItem[] = JSON.parse(text as string);
+
+            // 处理sbomItem对象，例如打印或访问其中的属性
+            console.log(sbomItem);
+            treeData.value = convertSbomToTree(sbomItem)
+            // 访问特定属性，例如：sbomItem.someProperty
+            // alert(sbomItem.someProperty); // 具体属性根据实际需求来获取
+            isTreeLoading.value = false
+          }
+
+
+        } catch (jsonError) {
+          console.error('解析JSON失败:', jsonError)
+        }
+      };
+
+      // 开始读取Blob对象
+      reader.readAsText(res.data); // 读取Blob为文本字符串
+    })
+    .catch(err => {
+      console.log('获取sbom结构出错', err)
+      ElMessage.error('获取sbom结构失败')
+    })
+    .finally(() => isTreeLoading.value = false)
   api.getVulList(props.projectId)
     .then(res => {
       dangerList.value = res.data.obj
@@ -210,51 +280,7 @@ onMounted(() => {
 
 
 
-interface Tree {
-  id: number
-  label: string
-  children?: Tree[]
-}
 
-const data: Tree[] = [
-  {
-    id: 0,
-    label: 'org.springframework.boot:spring-boot-starter-web',
-    children: [
-      {
-        id: 1,
-        label: 'org.springframework.boot:spring-boot-starter',
-        children: [
-          {
-            id: 2,
-            label: 'org.springtramework.boot:spring-boot-starter-logging',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: 'org.springframework.boot:spring-boot-starter-tomcat',
-    children: [
-      {
-        id: 4,
-        label: 'org.apache.tomcat.embed:tomcat-embed-el',
-        children: [
-          {
-            id: 5,
-            label: 'org.apache.tomcat.embed:tomcat-embed-websocket',
-          },
-        ],
-      },
-      {
-        id: 6,
-        label: 'org.apache.tomcat.embed:tomcat-embed-core',
-      },
-    ],
-  },
-
-]
 
 </script>
 
