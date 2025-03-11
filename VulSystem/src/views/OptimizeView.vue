@@ -17,7 +17,6 @@
           </el-icon>
         </el-tooltip>
       </div>
-
       <DataSetting :threshold-name="stratage?.detectStrategy.endsWith('whiteList') ? '误报过滤阈值' : '相似度阈值'"
         :threshold="stratage?.similarityThreshold ?? 0.5" :K="stratage?.maxDetectNums ?? 1"
         @update:threshold="updateThreshold" @update:K="updateK" />
@@ -34,7 +33,7 @@
 <script setup lang="ts">
 import { ArrowRight, Setting, InfoFilled } from '@element-plus/icons-vue'
 import DataCard from '@/components/DataCard.vue';
-import { onMounted, reactive, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import DataSetting from '@/components/Optimize/DataSetting.vue';
 import LlmInfo from '@/components/Optimize/LlmInfo.vue';
 import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
@@ -98,7 +97,7 @@ const llmList = ref<LlmInfoType[]>([
     accuracy: 0.92,
     falseRate: 0.01,
     infoTag: '准确率较高',
-    // needVip: true,
+    needVip: true,
   },
   {
     llmName: 'TinyModel-whiteList',

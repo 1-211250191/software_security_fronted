@@ -57,7 +57,7 @@ const localAccept = ref<boolean>(props.info.isaccept == 1); // 初始化本地�
 watch(() => props.info.isaccept, (newValue) => {
   localAccept.value = newValue == 1;
 });
-
+const emit = defineEmits(['refresh'])
 const dialogVisible = ref<boolean>(false)
 const loading = ref<boolean>(false)
 // 采纳漏洞
@@ -65,7 +65,10 @@ const beforeAcceptChange = () => {
   loading.value = true
   // 1:采纳 2: 不采纳
   const ifaccept = localAccept.value ? 2 : 1
-  return acceptVul(props.info.id, ifaccept).finally(() => loading.value = false)
+  return acceptVul(props.info.id, ifaccept).finally(() => {
+    loading.value = false
+    emit('refresh')
+  })
 }
 const timeFormatter = (dateString: string) => {
   // 将字符串转换为 Date 对象

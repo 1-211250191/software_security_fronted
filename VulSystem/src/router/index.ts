@@ -34,6 +34,11 @@ const router = createRouter({
       component: () => import('../views/OptimizeView.vue'),
     },
     {
+      path: '/users',
+      name: '用户中心',
+      component: () => import('../views/UserView.vue'),
+    },
+    {
       path: '/login',
       name: 'login',
       // route level code-splitting
@@ -53,9 +58,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.name !== 'login' && to.name !== 'register' && !localStorage.getItem('companyId')) {
+  if (to.name !== 'login' && to.name !== 'register' && !localStorage.getItem('companyId')) {
     next({ name: 'login' })
-  }else{
+  } else {
     next()
   }
 })
