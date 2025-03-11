@@ -3,7 +3,6 @@
 import {getSourceIcon, getSourceName} from "@/utils/parseSource.ts";
 import HighlightSearch from "@/components/text/HighlightSearch.vue";
 import type {ReportInfo} from "@/components/Danger/const.ts";
-import {QuestionFilled} from "@element-plus/icons-vue";
 
 const props = defineProps<{
   paginatedList: ReportInfo[],

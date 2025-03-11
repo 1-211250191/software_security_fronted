@@ -45,12 +45,20 @@ const rules = {
   ],
 }
 
-
 // language change
 function handleChangeLanguage(language: string) {
   newProject.language = language;
 }
 
+// tooltip content
+function getTooltipContent(language: string): string{
+  switch (language){
+    case 'java':
+      return "上传项目压缩包，支持 zip/7z/tar 等格式。<br>最大可接受的文件大小：100MB。";
+    case 'cpp':
+      return "上传项目压缩包，支持 zip/7z/tar 等格式。<br><span style='font-weight: bold'>请在压缩包根目录放置 kulin.txt，其中包含项目所有用到的库名，一个一行。</span><br>最大可接受的文件大小：100MB。";
+  }
+}
 
 // file upload
 const uploader = ref<UploadInstance>()
@@ -137,7 +145,7 @@ watch(() => props.project, (project) => {
             :on-success="handleFileUploadSuccess">
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
-              <el-tooltip content="上传项目压缩包，支持 zip/7z/tar 等格式。<br>最大可接受的文件大小：100MB。" raw-content placement="top">
+              <el-tooltip :content="getTooltipContent(newProject.language)" raw-content placement="top">
                 <el-icon class="question-icon">
                   <QuestionFilled />
                 </el-icon>
