@@ -33,7 +33,7 @@ export interface Record {
   vulnerabilityName: string
   cveId: string
   isDelete: number
-
+  description: string
   // [property: string]: never;
 }
 

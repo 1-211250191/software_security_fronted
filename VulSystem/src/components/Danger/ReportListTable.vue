@@ -8,6 +8,7 @@ const props = defineProps<{
   paginatedList: ReportInfo[],
   searchQuery: string
 }>()
+
 </script>
 
 <template>
@@ -15,7 +16,7 @@ const props = defineProps<{
     <thead>
     <tr>
       <th class="id">漏洞 ID</th>
-      <th class="name">漏洞描述</th>
+      <th class="name">漏洞名称与详情</th>
       <th class="time">披露时间</th>
       <th class="level">风险等级</th>
       <th class="ref">报告来源</th>
@@ -30,10 +31,17 @@ const props = defineProps<{
         />
       </td>
       <td class="name">
-        <HighlightSearch
-          :text="item.reportName"
-          :highlight="props.searchQuery"
-        />
+        <div class="name-container">
+          <HighlightSearch
+            :text="item.reportName"
+            :highlight="props.searchQuery"
+          />
+          <el-tooltip effect="dark" :content="item.reportDesc" placement="top">
+            <div class="details-icon">
+              <span>详情</span>
+            </div>
+          </el-tooltip>
+        </div>
       </td>
       <td class="time">{{ item.time }}</td>
       <td class="level">
@@ -75,6 +83,12 @@ const props = defineProps<{
 
 .danger-card-table .name {
   width: 500px;
+}
+
+.danger-card-table .name .name-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .danger-card-table .time {
@@ -158,6 +172,22 @@ const props = defineProps<{
   color: #096be0;
 }
 
+.details-icon{
+  border: 1px solid #096be0;
+  border-radius: 6px;
+  min-width: 40px;
+  height: 24px;
+  line-height: 24px;
+  display: flex;
+  margin-left: 10px;
+  justify-content: center;
+  align-items: center;
 
-
+  span{
+    color: #096be0;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+  }
+}
 </style>

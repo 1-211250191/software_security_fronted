@@ -17,6 +17,7 @@ export interface DangerInfo {
 
 export interface ReportInfo {
   reportName: string // 漏洞报告名
+  reportDesc: string // 漏洞描述
   reportId: string // 编号
   time: string // 披露时间
   isCve: boolean

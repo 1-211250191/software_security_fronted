@@ -131,7 +131,7 @@ const sendMessage = () => {
 
   // query assistant response
   queryLLM(inputMessage.value, selectedModel.value == '选择模型' ? '':selectedModel.value).then((res) => {
-    console.log(res.data)
+    console.log(res)
     if(res.data.code !== 200) {
       const assistantResponse: Message = {
         content: '服务器繁忙，请稍后再试。',
@@ -143,6 +143,14 @@ const sendMessage = () => {
     }
     const assistantResponse: Message = {
       content: res.data.obj.answer,
+      isAssistant: true,
+      timestamp: Date.now()
+    }
+    messages.value.push(assistantResponse)
+  }).catch((err) => {
+    console.log(err)
+    const assistantResponse: Message = {
+      content: '服务器繁忙，请稍后再试。',
       isAssistant: true,
       timestamp: Date.now()
     }

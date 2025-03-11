@@ -105,6 +105,7 @@ async function getReports(currentPage: number) {
         const report = data.obj.records[i];
         reportList.value.push({
           reportName: report.vulnerabilityName,
+          reportDesc: report.description,
           reportId: report.cveId,
           time: report.disclosureTime,
           riskLevel: report.riskLevel,
@@ -152,6 +153,7 @@ async function searchReports(keyword: string) {
         const report = data.obj[i];
       filteredReports.value.push({
           reportName: report.vulnerabilityName,
+          reportDesc: report.description,
           reportId: report.cveId,
           time: report.disclosureTime,
           riskLevel: report.riskLevel,
@@ -186,6 +188,7 @@ async function filterReports(riskLevel: string, startTime: string, endTime: stri
         const report = data.obj[i];
         filteredReports.value.push({
             reportName: report.vulnerabilityName,
+            reportDesc: report.description,
             reportId: report.cveId,
             time: report.disclosureTime,
             riskLevel: report.riskLevel,
