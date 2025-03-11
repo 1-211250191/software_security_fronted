@@ -131,30 +131,29 @@ const sendMessage = () => {
 
   // query assistant response
   queryLLM(inputMessage.value, selectedModel.value == '选择模型' ? '':selectedModel.value).then((res) => {
-    console.log(res)
-    if(res.data.code !== 200) {
+    function pushError() {
       const assistantResponse: Message = {
         content: '服务器繁忙，请稍后再试。',
         isAssistant: true,
         timestamp: Date.now()
       }
       messages.value.push(assistantResponse)
+    }
+
+    console.log(res)
+    if(res.data.code !== 200) {
+      pushError()
       return
     }
     const assistantResponse: Message = {
-      content: res.data.obj.answer,
+      content: res.data.obj,
       isAssistant: true,
       timestamp: Date.now()
     }
     messages.value.push(assistantResponse)
   }).catch((err) => {
     console.log(err)
-    const assistantResponse: Message = {
-      content: '服务器繁忙，请稍后再试。',
-      isAssistant: true,
-      timestamp: Date.now()
-    }
-    messages.value.push(assistantResponse)
+    pushError()
   })
 
   // clear input
