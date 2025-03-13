@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
+import {computed, reactive, ref, watch} from 'vue';
 import { type ProjectInfo } from './const';
 import { QuestionFilled } from "@element-plus/icons-vue";
 import LanguageSelector from "@/components/Project/LanguageSelector.vue";
 import { ElMessage, type FormInstance, type UploadInstance } from "element-plus";
+import { UploadFilled } from '@element-plus/icons-vue'
 
 
 // props and emits
 const props = withDefaults(defineProps<{
-  type: 'edit' | 'add'
+  type: 'edit' | 'add' | 'file';
   classname?: string;
   visible: boolean
   project?: ProjectInfo
@@ -32,6 +33,19 @@ const formRef = ref<FormInstance>();
 const currentFile = ref<File | null>(null);
 const fileUploadServerBaseURL = 'http://localhost:8080'; //TODO: change to real server address
 
+const getTitle = computed(() => {
+  switch (props.type) {
+    case 'add':
+      return '新建项目';
+    case 'edit':
+      return '编辑项目';
+    case 'file':
+      return '修改或上传项目文件';
+    default:
+      return '默认窗口';
+  }
+})
+
 // form rules
 const rules = {
   name: [
@@ -43,6 +57,9 @@ const rules = {
   filePath: [
     { required: true, message: '请上传项目文件', trigger: 'change' }
   ],
+  editFilePath: [
+    { required: true, message: '请上传项目文件', trigger: 'change' }
+  ]
 }
 
 // language change
@@ -52,11 +69,14 @@ function handleChangeLanguage(language: string) {
 
 // tooltip content
 function getTooltipContent(language: string): string{
+  console.log("当前项目", newProject)
   switch (language){
     case 'java':
       return "上传项目压缩包，支持 zip/7z/tar 等格式。<br>最大可接受的文件大小：100MB。";
     case 'cpp':
       return "上传项目压缩包，支持 zip/7z/tar 等格式。<br><span style='font-weight: bold'>请在压缩包根目录放置 kulin.txt，其中包含项目所有用到的库名，一个一行。</span><br>最大可接受的文件大小：100MB。";
+    default:
+      return "上传项目压缩包，支持 zip/7z/tar 等格式。<br>最大可接受的文件大小：100MB。";
   }
 }
 
@@ -93,9 +113,21 @@ const handleFileUploadSuccess = (response) => {
   } else {
     ElMessage.error('文件上传失败：' + response.message + '，' + response.obj)
     currentFile.value = null
-    uploader.value?.clearFiles()
+    if (uploader.value) {
+      uploader.value.clearFiles()
+    }
   }
 }
+
+const handleFileUploadError = (err) => {
+  console.error('文件上传失败：', err)
+  ElMessage.error('文件上传失败：' + err)
+  currentFile.value = null
+  if (uploader.value) {
+    uploader.value.clearFiles()
+  }
+}
+
 async function handleConfirmCreate(formEl: FormInstance | undefined) {
   if (!formEl) return
   await formEl.validate((valid) => {
@@ -117,15 +149,15 @@ watch(() => props.project, (project) => {
 
 <template>
   <!-- 新增项目的对话框 -->
-  <el-dialog v-model="dialogVisible" :title="type == 'add' ? '新增项目' : '编辑项目'" width="600">
+  <el-dialog v-model="dialogVisible" :title="getTitle" width="600">
     <el-form ref="formRef" :model="newProject" label-width="auto" style="max-width: 600px" :rules="rules">
-      <el-form-item label="项目名称" prop="name">
+      <el-form-item label="项目名称" prop="name" v-if="type == 'add' || type == 'edit'">
         <el-input v-model="newProject.name" placeholder="请输入项目名称" />
       </el-form-item>
-      <el-form-item label="项目描述">
+      <el-form-item label="项目描述"  v-if="type == 'add' || type == 'edit'">
         <el-input v-model="newProject.description" type="textarea" placeholder="请输入项目描述" />
       </el-form-item>
-      <el-form-item label="风险阈值" prop="risk_threshold">
+      <el-form-item label="风险阈值" prop="risk_threshold"  v-if="type == 'add' || type == 'edit'">
         <el-input-number v-model="newProject.risk_threshold" :min="0" :max="20" />
         <div class="tips">
           <el-tooltip content="风险阈值是指项目中漏洞数量超过多少时，项目状态会变为风险状态。<br>当风险阈值为零时，代表高风险风险阈值。" raw-content placement="top">
@@ -142,7 +174,9 @@ watch(() => props.project, (project) => {
         <div class="upload-file-container">
           <el-upload ref="uploader" :auto-upload="false" :on-change="handleFileChange" :show-file-list="false"
             :multiple="false" :action="fileUploadServerBaseURL + '/project/uploadFile'"
-            :on-success="handleFileUploadSuccess">
+            :on-success="handleFileUploadSuccess"
+            :on-error="handleFileUploadError"
+          >
             <el-button type="primary">选择文件</el-button>
             <div class="tips">
               <el-tooltip :content="getTooltipContent(newProject.language)" raw-content placement="top">
@@ -151,6 +185,40 @@ watch(() => props.project, (project) => {
                 </el-icon>
               </el-tooltip>
             </div>
+          </el-upload>
+          <div v-if="currentFile" class="selected-file">
+            <span>已选择文件: {{ currentFile.name }}</span>
+            <el-button type="danger" size="small" @click="removeFile" class="remove-button"
+              v-if="newProject.filePath == null">移除</el-button>
+            <el-button type="primary" size="small" @click="uploadFile" v-if="newProject.filePath == null">上传</el-button>
+            <div class="upload-success" v-if="newProject.filePath != null">上传成功！</div>
+          </div>
+        </div>
+      </el-form-item>
+      <el-form-item label="项目文件" prop="editFilePath" v-if="type == 'file'">
+        <div class="upload-file-drag-container">
+          <el-upload ref="uploader" :auto-upload="false" :on-change="handleFileChange" :show-file-list="false"
+            :multiple="false" :action="fileUploadServerBaseURL + '/project/uploadFile'"
+            :on-success="handleFileUploadSuccess" drag
+            style="width: 100%"
+            :on-error="handleFileUploadError"
+          >
+            <el-icon class="el-icon--upload">
+              <upload-filled />
+            </el-icon>
+            <div class="el-upload__text">
+              <span>点击此处选择文件或将文件拖拽到此处上传</span>
+            </div>
+            <template #tip>
+                <div class="el-upload__tip" style="display: flex; justify-content: flex-start; align-items: center; gap: 10px">
+                  支持扩展名：zip, 7z, tar
+                  <el-tooltip :content="getTooltipContent(newProject.language)" raw-content placement="top">
+                    <el-icon class="question-icon">
+                      <QuestionFilled />
+                    </el-icon>
+                  </el-tooltip>
+                </div>
+            </template>
           </el-upload>
           <div v-if="currentFile" class="selected-file">
             <span>已选择文件: {{ currentFile.name }}</span>
@@ -177,7 +245,6 @@ watch(() => props.project, (project) => {
 .tips {
   display: flex;
   align-items: center;
-
   margin-left: 10px;
   cursor: pointer;
 }
@@ -203,6 +270,36 @@ watch(() => props.project, (project) => {
     margin-top: 10px;
     display: flex;
     flex-direction: row;
+  }
+
+  .remove-button {
+    margin-left: 10px;
+  }
+
+  .upload-success {
+    color: #67c23a;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+}
+
+.upload-file-drag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 100%;
+  position: relative;
+  margin: 0 20px;
+  span {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .selected-file {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
   }
 
   .remove-button {
