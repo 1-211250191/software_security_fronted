@@ -79,8 +79,7 @@ import type { DangerInfo } from '@/components/Danger/const';
 import { api } from './service';
 import DangerCard from '@/components/ProjectsDetail/DangerCard.vue';
 import { getSbomFile } from '@/components/ProjectsDetail/service';
-import type { SbomItem } from '@/components/ProjectsDetail/const';
-import { fa } from 'element-plus/es/locales.mjs';
+import type { SbomItem, SbomResponse } from '@/components/ProjectsDetail/const';
 import { ElMessage } from 'element-plus';
 const props = defineProps<{
   projectId: number
@@ -214,20 +213,29 @@ const getProjectDetail = () => {
 
 // 转换函数
 const convertSbomToTree = (sbomItems: SbomItem[]): Tree[] => {
-  return sbomItems.map(item => {
-    // 创建 Tree 对象
-    const treeItem: Tree = {
-      id: item.id,
-      label: item.name,
-      children: item.children ? convertSbomToTree(item.children) : undefined // 如果有 children，则递归转换
-    };
-    return treeItem;
-  });
+
+
+  return sbomItems
+    // .filter(item => item.vendor && item.name) // 过滤掉 label 和 name 为空的项
+    .map(item => {
+      // 创建 Tree 对象
+      // 创建 Tree 对象
+      let label_name: string = 'undefined'
+      if (item.label && item.name) {
+        label_name = item.vendor + item.name
+      }
+      const treeItem: Tree = {
+        id: item.id,
+        label: label_name,
+        children: item.children ? convertSbomToTree(item.children) : undefined // 如果有 children，则递归转换
+      };
+      return treeItem;
+    });
 };
 
 interface Tree {
   id: string
-  label: string
+  label?: string
   children?: Tree[]
 }
 
@@ -248,7 +256,8 @@ onMounted(() => {
           const text = event.target?.result;
           if (text) {
             // 解析为JSON对象
-            const sbomItem: SbomItem[] = JSON.parse(text as string);
+            const sbomRes: SbomResponse = JSON.parse(text as string);
+            const sbomItem: SbomItem[] = sbomRes.children ?? [];
 
             // 处理sbomItem对象，例如打印或访问其中的属性
             console.log(sbomItem);
