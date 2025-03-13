@@ -20,9 +20,67 @@ const props = defineProps({
 
 const highlightedText = computed(() => {
   if (!props.highlight) return props.text;
-  // we might not use regex here, it would fail when inputting 'xxx)' or 'xxx('.
-  return props.text.replace(props.highlight, `<span class="highlight bounce-animation">${props.highlight}</span>`);
-})
+
+  // 将文本和高亮词转换为小写以忽略大小写
+  const lowerText = props.text.toLowerCase();
+  const lowerHighlight = props.highlight.toLowerCase();
+
+  const isEqual = (charS, charT) => {
+    if(charS === '(' && charT === '（') return true;
+    if(charS === ')' && charT === '）') return true;
+    return charS === charT;
+  }
+
+  // pre-build table
+  const buildPartialMatchTable = (pattern) => {
+    const table = new Array(pattern.length).fill(0);
+    let prefixLength = 0;
+    for (let i = 1; i < pattern.length; i++) {
+      while (prefixLength > 0 && !isEqual(pattern[i], pattern[prefixLength])) {
+        prefixLength = table[prefixLength - 1];
+      }
+      if (isEqual(pattern[i], pattern[prefixLength])) {
+        prefixLength++;
+      }
+      table[i] = prefixLength;
+    }
+    return table;
+  };
+
+  // KMP search
+  const kmpSearch = (text, pattern) => {
+    const table = buildPartialMatchTable(pattern);
+    const matches = [];
+    let j = 0;
+    for (let i = 0; i < text.length; i++) {
+      while (j > 0 && !isEqual(text[i], pattern[j])) {
+        j = table[j - 1];
+      }
+      if (isEqual(text[i], pattern[j])) {
+        j++;
+      }
+      if (j === pattern.length) {
+        matches.push(i - pattern.length + 1);
+        j = table[j - 1];
+      }
+    }
+    return matches;
+  };
+
+  const matches = kmpSearch(lowerText, lowerHighlight);
+  if (matches.length === 0) return props.text;
+  let result = '';
+  let lastIndex = 0;
+  for (const matchIndex of matches) {
+    result += props.text.slice(lastIndex, matchIndex);
+    result += `<span class="highlight bounce-animation">${props.text.slice(matchIndex, matchIndex + props.highlight.length)}</span>`;
+    lastIndex = matchIndex + props.highlight.length;
+  }
+  result += props.text.slice(lastIndex);
+
+  return result;
+});
+
 
 watch(() => props.highlight, () => {
   // remove and add class to trigger animation
