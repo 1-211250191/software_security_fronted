@@ -221,8 +221,8 @@ const convertSbomToTree = (sbomItems: SbomItem[]): Tree[] => {
       // 创建 Tree 对象
       // 创建 Tree 对象
       let label_name: string = 'undefined'
-      if (item.label && item.name) {
-        label_name = item.vendor + item.name
+      if (item.vendor && item.name) {
+        label_name = item.vendor + ':' + item.name
       }
       const treeItem: Tree = {
         id: item.id,
