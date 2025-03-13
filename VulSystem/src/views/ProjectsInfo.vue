@@ -62,7 +62,7 @@
       </div>
       <div v-else-if="filteredProjects.length > 0">
         <PInfo v-for="info in filteredProjects" :key="info.id" :project="info" @delete="handleDeleteProject"
-          @edit="handleEditProject" />
+          @edit="handleEditProject" @edit-file="handleEditProject"/>
       </div>
       <div v-else>
         <el-empty description="暂无项目"></el-empty>
