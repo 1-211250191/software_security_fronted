@@ -14,7 +14,7 @@ const props = withDefaults(
     canEdit: true  // 默认可编辑
   }
 );
-const emit = defineEmits(['edit', 'delete']);
+const emit = defineEmits(['edit', 'delete', 'editFile']);
 
 type Tags = {
   [key: string]: { color: string, bgc: string, text: string };
@@ -58,6 +58,13 @@ const handleEdit = (project: ProjectInfo) => {
   editFormVisible.value = false;
 }
 
+const editFileFormVisible = ref(false);
+
+const handleEditFile = (project: ProjectInfo) => {
+  emit('editFile', project);
+  editFileFormVisible.value = false;
+}
+
 </script>
 
 <template>
@@ -87,10 +94,15 @@ const handleEdit = (project: ProjectInfo) => {
     </div>
     <div class="detail" v-if="isOpen">
       <div class="text">检测标准阈值: {{ project.risk_threshold ?? 10 }}</div>
+      <div class="modify-project-button" @click="editFileFormVisible = true">
+        修改项目文件
+      </div>
     </div>
   </div>
   <ProjectForm type="edit" :visible="editFormVisible" @cancel="() => editFormVisible = false" @confirm="handleEdit"
     @close="() => editFormVisible = false" :project="project" />
+  <ProjectForm type="file" :visible="editFileFormVisible" @cancel="() => editFileFormVisible = false" @confirm="handleEditFile"
+               @close="() => editFileFormVisible = false" :project="project" />
 </template>
 
 <style scoped>
@@ -161,11 +173,32 @@ const handleEdit = (project: ProjectInfo) => {
 .detail {
   width: 100%;
   background-color: #dedfe03f;
-  padding: 15px;
+  padding: 6px 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
 
   .text {
     color: #666;
     font-size: 12px;
+  }
+
+  .modify-project-button{
+    padding: 2px 8px;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #666;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 12px;
+    border: 1px solid #dedfe0;
+    transition: all 0.4s;
+  }
+
+  .modify-project-button:hover{
+    background-color: #f5f5f5;
   }
 }
 </style>

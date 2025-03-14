@@ -46,8 +46,12 @@ const handleLogin = () => {
         return
       }
       localStorage.setItem('companyId', res.data.obj.companyId)
+      localStorage.setItem('companyName', res.data.obj.companyName)
       ElMessage.success('登录成功')
-      router.push('/')
+      // wait for 0.5 second
+      setTimeout(() => {
+        router.push('/')
+      }, 500)
     })
     .catch(err => {
       ElMessage.error(err)
