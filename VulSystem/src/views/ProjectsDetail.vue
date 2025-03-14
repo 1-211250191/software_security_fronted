@@ -216,7 +216,7 @@ const convertSbomToTree = (sbomItems: SbomItem[]): Tree[] => {
 
 
   return sbomItems
-    // .filter(item => item.vendor && item.name) // 过滤掉 label 和 name 为空的项
+    .filter(item => item.vendor && item.name) // 过滤掉 label 和 name 为空的项
     .map(item => {
       // 创建 Tree 对象
       // 创建 Tree 对象
