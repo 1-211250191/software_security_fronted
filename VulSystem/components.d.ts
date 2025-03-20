@@ -65,5 +65,6 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SbomForm: typeof import('./src/components/ProjectsDetail/SbomForm.vue')['default']
+    TestTree: typeof import('./src/components/TestTree.vue')['default']
   }
 }

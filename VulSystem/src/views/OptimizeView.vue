@@ -1,4 +1,5 @@
 <template>
+  <!-- <TestTree /> -->
   <el-breadcrumb :separator-icon="ArrowRight" class="bread">
     <el-breadcrumb-item :to="{ path: '/optimize' }">
       <el-icon color="#336FFF" size="14">
@@ -39,6 +40,7 @@ import LlmInfo from '@/components/Optimize/LlmInfo.vue';
 import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
 import { ElMessage } from 'element-plus';
 import { changeStrategy, getStrategy } from '@/components/Optimize/service';
+import TestTree from '@/components/TestTree.vue';
 // const chosenLlmName = ref<string>('VulLibMiner')
 const llmList = ref<LlmInfoType[]>([
   {

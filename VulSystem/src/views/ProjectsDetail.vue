@@ -50,7 +50,31 @@
       </div>
       <template v-else>
         <div class="tree-container">
-          <el-tree :data="treeData" node-key="id" default-expand-all :props="{ class: 'custom-node' }" />
+          <!-- <el-tree :data="treeData" node-key="id" default-expand-all :props="{ class: 'custom-node' }" /> -->
+          <el-tree :data="treeData" node-key="id" default-expand-all :props="{ class: 'custom-node' }">
+            <template #default="{ node, data }">
+              <span v-if="!node.isLeaf" style="display: flex; align-items: center;">
+                <el-icon v-if="node.expanded" style="margin: 0 6px 0 0px;" size="16">
+                  <Folder />
+                </el-icon>
+                <!-- <el-icon v-else style="margin: 0 6px 0 0px;" size="16">
+                  <Folder />
+                </el-icon> -->
+                <el-icon v-else style="margin: 0 6px 0 0px;" size="16">
+                  <Files />
+                </el-icon>
+                {{ node.label }}
+              </span>
+
+              <span v-else style="display: flex; align-items: center;">
+                <el-icon style="margin: 0 6px 0 0px;" size="16">
+                  <Document />
+                </el-icon>
+                {{ node.label }}
+              </span>
+            </template>
+
+          </el-tree>
         </div>
       </template>
 
@@ -69,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, DocumentCopy } from '@element-plus/icons-vue'
+import { ArrowRight, DocumentCopy, Document, Folder, Files } from '@element-plus/icons-vue'
 import WChart from '@/components/chart/index.vue'
 import DataCard from '@/components/DataCard.vue';
 import SbomForm from '@/components/ProjectsDetail/SbomForm.vue';
@@ -293,7 +317,7 @@ onMounted(() => {
 
 </script>
 
-<style scoped>
+<style>
 .bread {
   margin: 15px;
 
@@ -315,11 +339,21 @@ onMounted(() => {
 
 .tree-container {
   margin: 15px;
-}
+  width: 60%;
 
-.custom-node .el-tree-node__content {
-  color: #626aef;
-  font-size: 20px !important;
-  height: 25px;
+  .custom-node {
+
+    .el-icon svg {
+      color: #336fff
+    }
+  }
+
+  .custom-node>.el-tree-node__content {
+    font-size: 16px;
+    padding: 10px 0;
+    margin: 3px 0;
+    border-bottom: 1px solid #e4e4e4c2;
+  }
+
 }
 </style>
