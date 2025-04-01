@@ -35,7 +35,7 @@ watch(() => props.threshold, (newValue) => {
 
 watch(() => props.K, (newValue) => {
   K.value = newValue;
-});  
+});
 </script>
 
 <template>
@@ -91,33 +91,9 @@ watch(() => props.K, (newValue) => {
 .data-setting {
   width: 100%;
   display: flex;
-  margin: 5px 0 20px;
-  padding: 5px;
-
-  .info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-
-    .label {
-      font-size: 14px;
-      margin-right: 20px;
-      font-weight: normal;
-    }
-
-    .text {
-      margin-left: 20px;
-      font-size: 14px;
-      cursor: pointer;
-
-      .edit {
-        color: #336FFF;
-      }
-
-      .cancel {
-        color: #B7B9BD;
-      }
-    }
-  }
+  margin: 5px 0 12px;
+  padding: 5px 10px;
+  /* background-color: #fff; */
+  border-radius: 5px;
 }
 </style>

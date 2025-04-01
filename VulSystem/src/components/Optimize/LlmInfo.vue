@@ -58,9 +58,10 @@ const emit = defineEmits(['update:name'])
   cursor: pointer;
   padding: 10px 15px;
   padding-bottom: 0;
-  box-shadow: rgba(99, 99, 99, 0.116) 0px 2px 8px 0px;
+  background-color: #fff;
+  /* box-shadow: rgba(99, 99, 99, 0.116) 0px 2px 8px 0px; */
   border-radius: 8px;
-  height: 150px;
+  /* height: 160px; */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -75,6 +76,10 @@ const emit = defineEmits(['update:name'])
   .header {
     margin-bottom: 10px;
 
+    h4 {
+      font-weight: 600;
+    }
+
     .right {
       display: flex;
       justify-content: space-around;
@@ -82,26 +87,21 @@ const emit = defineEmits(['update:name'])
   }
 
   .text {
-    flex: 1;
+    /* flex: 1; */
+    height: 68px;
     width: 100%;
     font-size: 14px;
     color: #555557;
-    display: -webkit-box;
-    /* 为了使用 WebKit 的剪裁 */
-    -webkit-box-orient: vertical;
-    /* 设置方向为垂直 */
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    /* 设置显示的行数 */
     overflow: hidden;
-    /* 隐藏超出内容 */
     text-overflow: ellipsis;
-    /* 显示省略号 */
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
   }
 
   .footer {
     /* border-top: 1px solid #efefefd5; */
-    height: 50px;
+    height: 40px;
 
     .data-info {
       display: flex;
@@ -126,6 +126,7 @@ const emit = defineEmits(['update:name'])
 
     .llm-button {
       display: none;
+      /* margin-bottom: 20px; */
     }
 
     .no-vip {
@@ -144,6 +145,8 @@ const emit = defineEmits(['update:name'])
 
   .llm-button {
     display: block;
+    position: relative;
+    bottom: 10px;
   }
 }
 
@@ -155,5 +158,9 @@ const emit = defineEmits(['update:name'])
   line-height: 20px;
   cursor: pointer;
   margin: 0 5px;
+  /* overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis; */
 }
 </style>

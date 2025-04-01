@@ -8,25 +8,55 @@
       <span class="bread-item">应用优化</span>
     </el-breadcrumb-item>
   </el-breadcrumb>
-  <DataCard title="应用优化方案" width="auto">
+  <section>
+    <DataSetting :threshold-name="stratage?.detectStrategy.endsWith('whiteList') ? '误报过滤阈值' : '相似度阈值'"
+      :threshold="stratage?.similarityThreshold ?? 0.5" :K="stratage?.maxDetectNums ?? 1"
+      @update:threshold="updateThreshold" @update:K="updateK" />
+    <div class="filter">
+      <h4>模型筛选</h4>
+      <div class="filter-line">
+        <div class="label">模型</div>
+        <ul class="filter-list">
+          <li v-for="item in modelFilterList" :key="item.value" @click="choosenFilter.model = item.value"
+            :class="{ 'chosen': item.value === choosenFilter.model }">
+            {{ item.label }}
+          </li>
+          <!-- <li class="choosen">全部</li>
+            <li>预训练模型</li>
+            <li>大语言模型</li> -->
+        </ul>
+      </div>
+      <div class="filter-line">
+        <div class="label">优化器</div>
+        <ul class="filter-list">
+          <li v-for="item in optimizeFilterList" :key="item.value" @click="choosenFilter.optimize = item.value"
+            :class="{ 'chosen': item.value === choosenFilter.optimize }">
+            {{ item.label }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="text">
+      <span>共{{ filteredList.length }}个模型，请选择需要的优化策略</span>
+      <el-tooltip class="box-item" effect="dark" content="提高阈值能提升检测准确率, 但有可能减少预测结果" placement="bottom">
+        <el-icon>
+          <InfoFilled />
+        </el-icon>
+      </el-tooltip>
+    </div>
+    <div class="llm-list">
+      <LlmInfo v-for="llm in filteredList" :key="llm.llmName" :is-vip="stratage?.isMember == 1"
+        :is-chosen="llm.llmName == stratage?.detectStrategy" :info="llm" @update:name="updateStratageName" />
+    </div>
+  </section>
+
+  <!-- <DataCard title="应用优化方案" width="auto">
     <template #main>
-      <div class="text">
-        <span>共{{ llmList.length }}个模型，请选择需要的优化策略</span>
-        <el-tooltip class="box-item" effect="dark" content="提高阈值能提升检测准确率, 但有可能减少预测结果" placement="bottom">
-          <el-icon>
-            <InfoFilled />
-          </el-icon>
-        </el-tooltip>
-      </div>
-      <DataSetting :threshold-name="stratage?.detectStrategy.endsWith('whiteList') ? '误报过滤阈值' : '相似度阈值'"
-        :threshold="stratage?.similarityThreshold ?? 0.5" :K="stratage?.maxDetectNums ?? 1"
-        @update:threshold="updateThreshold" @update:K="updateK" />
-      <div class="llm-list">
-        <LlmInfo v-for="llm in llmList" :key="llm.llmName" :is-vip="stratage?.isMember == 1"
-          :is-chosen="llm.llmName == stratage?.detectStrategy" :info="llm" @update:name="updateStratageName" />
-      </div>
+
     </template>
-  </DataCard>
+</DataCard> -->
 
 
 </template>
@@ -34,7 +64,7 @@
 <script setup lang="ts">
 import { ArrowRight, Setting, InfoFilled } from '@element-plus/icons-vue'
 import DataCard from '@/components/DataCard.vue';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import DataSetting from '@/components/Optimize/DataSetting.vue';
 import LlmInfo from '@/components/Optimize/LlmInfo.vue';
 import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
@@ -42,16 +72,47 @@ import { ElMessage } from 'element-plus';
 import { changeStrategy, getStrategy } from '@/components/Optimize/service';
 // import TestTree from '@/components/TestTree.vue';
 // const chosenLlmName = ref<string>('VulLibMiner')
+const choosenFilter = ref<{ model: string, optimize: string }>({
+  model: 'all',
+  optimize: 'all'
+})
+const modelFilterList: Array<{ value: string, label: string, }> = [
+  {
+    value: 'all',
+    label: '全部'
+  }, {
+    value: 'PreTrain',
+    label: '预训练模型',
+  }, {
+    value: 'LLM',
+    label: '大语言模型',
+  }
+]
+const optimizeFilterList: Array<{ value: string, label: string }> = [
+  {
+    value: 'all',
+    label: '全部'
+  }, {
+    value: 'cos',
+    label: '相似度算法优化器',
+  }, {
+    value: 'whiteList',
+    label: '白名单优化器',
+  }, {
+    value: 'none',
+    label: '无'
+  }
+]
 const llmList = ref<LlmInfoType[]>([
   {
-    llmName: 'TinyModel',
-    desc: '利用TF-IDF打分算法结合基于BERT-FNN的TinyModel方法进行检测，能够高效识别常见漏洞。',
+    llmName: 'PreTrainModel',
+    desc: '利用TF-IDF打分算法结合基于BERT-FNN的PreTrainModel方法进行检测，能够高效识别常见漏洞。',
     accuracy: 0.75,
     falseRate: 0.03
   },
   {
     llmName: 'LLM',
-    desc: '在TinyModel的识别基础上，使用大语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
+    desc: '在PreTrainModel的识别基础上，使用大语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
     accuracy: 0.85,
     falseRate: 0.01
   },
@@ -62,8 +123,8 @@ const llmList = ref<LlmInfoType[]>([
     falseRate: 0.015,
   },
   {
-    llmName: 'TinyModel-lev',
-    desc: '在TinyModel基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    llmName: 'PreTrainModel-lev',
+    desc: '在PreTrainModel基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.82,
     falseRate: 0.025
   },
@@ -75,8 +136,8 @@ const llmList = ref<LlmInfoType[]>([
     infoTag: '误报率较低',
   },
   {
-    llmName: 'TinyModel-cos',
-    desc: '在TinyModel基础上结合余弦相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
+    llmName: 'PreTrainModel-cos',
+    desc: '在PreTrainModel基础上结合余弦相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.80,
     falseRate: 0.02,
     infoTag: '误报率较低',
@@ -88,8 +149,8 @@ const llmList = ref<LlmInfoType[]>([
     falseRate: 0.017
   },
   {
-    llmName: 'TinyModel-lcs',
-    desc: '在TinyModel基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
+    llmName: 'PreTrainModel-lcs',
+    desc: '在PreTrainModel基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.79,
     falseRate: 0.022
   },
@@ -102,8 +163,8 @@ const llmList = ref<LlmInfoType[]>([
     needVip: true,
   },
   {
-    llmName: 'TinyModel-whiteList',
-    desc: '在TinyModel检测的流程中，定制化添加您的企业白名单，确保高准确率。通过阈值过滤的方式降低误报率。',
+    llmName: 'PreTrainModel-whiteList',
+    desc: '在PreTrainModel检测的流程中，定制化添加您的企业白名单，确保高准确率。通过阈值过滤的方式降低误报率。',
     accuracy: 0.83,
     falseRate: 0.02,
     infoTag: '准确率较高',
@@ -114,8 +175,45 @@ const llmList = ref<LlmInfoType[]>([
 // const threshold = ref<number>(0.5);
 // const K = ref<number>(3);
 
+const filteredList = computed(() => {
+  const resList = llmList.value
+    .filter(item => {
+      if (choosenFilter.value.model == 'all') {
+        return true;
+      } else {
+        return item.llmName.startsWith(choosenFilter.value.model)
+      }
+    })
+    .filter(({ llmName }) => {
+      const { optimize } = choosenFilter.value;
+      if (optimize == 'all') {
+        return true;
+      } else {
+        const hasOptimize = llmName.includes('-');
+        const ifWhite = llmName.endsWith('whiteList')
+        if (optimize == 'cos') {
+          return hasOptimize && !ifWhite;
+        } else if (optimize == 'whiteList') {
+          return hasOptimize && ifWhite
+        } else {
+          return !hasOptimize;
+        }
+      }
+    })
 
-const stratage = ref<CompanyStrategy>()
+  const index = resList.findIndex(item => item.llmName === stratage.value?.detectStrategy);
+  if (index !== -1) {
+    const [itemToMove] = resList.splice(index, 1); // 删除原数组中的该项
+    resList.unshift(itemToMove); // 将删除的项插入数组最前面
+  }
+  return resList;
+})
+const stratage = ref<CompanyStrategy>({
+  similarityThreshold: 0.7,
+  maxDetectNums: 3,
+  detectStrategy: "LLM",
+  isMember: 1,
+})
 onMounted(() => {
   getStrategy()
     .then(res => {
@@ -142,6 +240,7 @@ const updateK = (value: number) => {
 watch(
   () => stratage.value?.detectStrategy,
   (newValue) => {
+    console.log('change')
     // 将对应策略放到最前面
     const index = llmList.value.findIndex(item => item.llmName === newValue);
     if (index !== -1) {
@@ -191,8 +290,63 @@ const changeStratage = () => {
   }
 }
 
+section {
+  padding: 0 20px;
+}
+
+.filter {
+  margin: 20px 0 20px;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #fff;
+  /* box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px; */
+
+
+  h4 {
+    font-weight: bold;
+    margin-bottom: 18px;
+    border-bottom: #336FFF solid 1px;
+    padding-bottom: 10px;
+  }
+
+  .filter-line {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    font-size: 14px;
+
+
+    .label {
+      width: 80px;
+      color: #7a7979;
+
+    }
+
+    ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+
+      li {
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-right: 20px;
+      }
+
+      li:hover,
+      .chosen {
+        background-color: #ecf5ff;
+        border-radius: 5px;
+        color: #336FFF;
+      }
+    }
+  }
+}
+
 .text {
-  margin-top: 10px;
+  margin-bottom: 10px;
   padding: 5px;
   display: flex;
   /* align-items: bottom; */
@@ -218,5 +372,19 @@ const changeStratage = () => {
   /* 卡片之间的间距，可以根据需要调节 */
   /* padding: 16px; */
   /* 网格容器的内边距 */
+}
+
+@media (max-width: 1000px) {
+  .llm-list {
+    grid-template-columns: repeat(2, 1fr);
+    /* 每行放 2 个卡片 */
+  }
+}
+
+@media (max-width: 700px) {
+  .llm-list {
+    grid-template-columns: repeat(1, 1fr);
+    /* 每行放 2 个卡片 */
+  }
 }
 </style>

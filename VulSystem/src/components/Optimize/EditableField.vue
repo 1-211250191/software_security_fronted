@@ -67,11 +67,6 @@ function cancelEdit() {
 
 <style scoped>
 .data-setting {
-  width: 100%;
-  display: flex;
-  margin: 20px 0;
-  padding: 5px;
-
   .info {
     flex: 1;
     display: flex;
@@ -79,8 +74,9 @@ function cancelEdit() {
 
     .label {
       font-size: 14px;
-      font-weight: normal;
+      font-weight: bold;
       margin-right: 25px;
+      color: #555557;
     }
 
 
