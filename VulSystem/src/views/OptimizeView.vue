@@ -169,6 +169,12 @@ const llmList = ref<LlmInfoType[]>([
     falseRate: 0.02,
     infoTag: '准确率较高',
     needVip: true,
+  },
+  {
+    llmName: 'VulDet',
+    desc: '基于VulDet的检测，有较好的跨生态系统适配性，较高的版本粒度检测精度',
+    accuracy: 0.90,
+    falseRate: 0.02
   }
 ])
 // 定义响应式变量
