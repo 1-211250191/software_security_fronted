@@ -1,3 +1,14 @@
+// 模型分类
+export enum ModelType {
+  PreTrain,
+  LLM,
+}
+// 优化器分类
+export enum OptimizeType {
+  Similarity,
+  WhiteList,
+  None,
+}
 export interface LlmInfoType {
   llmName: string
   desc: string
@@ -5,7 +16,10 @@ export interface LlmInfoType {
   needVip?: boolean
   accuracy: number
   falseRate: number
+  modelType: ModelType
+  optimizeType: OptimizeType
 }
+
 export interface StrategyRequest {
   companyId: number
   /**

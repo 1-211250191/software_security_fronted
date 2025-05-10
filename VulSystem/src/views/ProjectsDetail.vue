@@ -237,8 +237,6 @@ const getProjectDetail = () => {
 
 // 转换函数
 const convertSbomToTree = (sbomItems: SbomItem[]): Tree[] => {
-
-
   return sbomItems
     .filter(item => item.vendor && item.name) // 过滤掉 label 和 name 为空的项
     .map(item => {

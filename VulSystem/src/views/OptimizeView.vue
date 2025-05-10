@@ -67,66 +67,75 @@ import DataCard from '@/components/DataCard.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import DataSetting from '@/components/Optimize/DataSetting.vue';
 import LlmInfo from '@/components/Optimize/LlmInfo.vue';
-import type { CompanyStrategy, LlmInfoType } from '@/components/Optimize/const';
+import { ModelType, OptimizeType, type CompanyStrategy, type LlmInfoType } from '@/components/Optimize/const';
 import { ElMessage } from 'element-plus';
 import { changeStrategy, getStrategy } from '@/components/Optimize/service';
 // import TestTree from '@/components/TestTree.vue';
 // const chosenLlmName = ref<string>('VulLibMiner')
-const choosenFilter = ref<{ model: string, optimize: string }>({
+const choosenFilter = ref<{ model: 'all' | ModelType, optimize: 'all' | OptimizeType }>({
   model: 'all',
   optimize: 'all'
 })
-const modelFilterList: Array<{ value: string, label: string, }> = [
+const modelFilterList: Array<{ value: 'all' | ModelType, label: string, }> = [
   {
     value: 'all',
     label: '全部'
   }, {
-    value: 'PreTrain',
+    value: ModelType.PreTrain,
     label: '预训练模型',
   }, {
-    value: 'LLM',
+    value: ModelType.LLM,
     label: '大语言模型',
   }
 ]
-const optimizeFilterList: Array<{ value: string, label: string }> = [
+const optimizeFilterList: Array<{ value: 'all' | OptimizeType, label: string }> = [
   {
     value: 'all',
     label: '全部'
   }, {
-    value: 'cos',
+    value: OptimizeType.Similarity,
     label: '相似度算法优化器',
   }, {
-    value: 'whiteList',
+    value: OptimizeType.WhiteList,
     label: '白名单优化器',
   }, {
-    value: 'none',
+    value: OptimizeType.None,
     label: '无'
   }
 ]
+
 const llmList = ref<LlmInfoType[]>([
   {
     llmName: 'PreTrainModel',
     desc: '利用TF-IDF打分算法结合基于BERT-FNN的PreTrainModel方法进行检测，能够高效识别常见漏洞。',
     accuracy: 0.75,
-    falseRate: 0.03
+    falseRate: 0.03,
+    modelType: ModelType.PreTrain,
+    optimizeType: OptimizeType.None,
   },
   {
     llmName: 'LLM',
     desc: '在PreTrainModel的识别基础上，使用大语言模型（LLM）进行漏洞检测，具有强大的漏洞检测能力。',
     accuracy: 0.85,
-    falseRate: 0.01
+    falseRate: 0.01,
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.None,
   },
   {
     llmName: 'LLM-lev',
     desc: '在LLM基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.90,
     falseRate: 0.015,
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.Similarity,
   },
   {
     llmName: 'PreTrainModel-lev',
     desc: '在PreTrainModel基础上结合Levenshtein距离相似度匹配算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.82,
-    falseRate: 0.025
+    falseRate: 0.025,
+    modelType: ModelType.PreTrain,
+    optimizeType: OptimizeType.Similarity,
   },
   {
     llmName: 'LLM-cos',
@@ -134,6 +143,8 @@ const llmList = ref<LlmInfoType[]>([
     accuracy: 0.88,
     falseRate: 0.018,
     infoTag: '误报率较低',
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.Similarity,
   },
   {
     llmName: 'PreTrainModel-cos',
@@ -141,18 +152,34 @@ const llmList = ref<LlmInfoType[]>([
     accuracy: 0.80,
     falseRate: 0.02,
     infoTag: '误报率较低',
+    modelType: ModelType.PreTrain,
+    optimizeType: OptimizeType.Similarity,
   },
   {
     llmName: 'LLM-lcs',
     desc: '在LLM基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.87,
-    falseRate: 0.017
+    falseRate: 0.017,
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.Similarity,
   },
   {
     llmName: 'PreTrainModel-lcs',
     desc: '在PreTrainModel基础上结合最长公共子序列（LCS）算法，与您的企业白名单进行匹配，提升准确率。',
     accuracy: 0.79,
-    falseRate: 0.022
+    falseRate: 0.022,
+    modelType: ModelType.PreTrain,
+    optimizeType: OptimizeType.Similarity,
+  },
+  {
+    llmName: 'LLM-VulDet',
+    desc: '使用大语言模型（LLM）进行漏洞检测，能够检测出具体的版本信息',
+    accuracy: 0.79,
+    falseRate: 0.022,
+    infoTag: '版本检测',
+    needVip: true,
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.None,
   },
   {
     llmName: 'LLM-whiteList',
@@ -161,6 +188,8 @@ const llmList = ref<LlmInfoType[]>([
     falseRate: 0.01,
     infoTag: '准确率较高',
     needVip: true,
+    modelType: ModelType.LLM,
+    optimizeType: OptimizeType.WhiteList,
   },
   {
     llmName: 'PreTrainModel-whiteList',
@@ -169,6 +198,8 @@ const llmList = ref<LlmInfoType[]>([
     falseRate: 0.02,
     infoTag: '准确率较高',
     needVip: true,
+    modelType: ModelType.PreTrain,
+    optimizeType: OptimizeType.WhiteList,
   }
 ])
 // 定义响应式变量
@@ -177,27 +208,19 @@ const llmList = ref<LlmInfoType[]>([
 
 const filteredList = computed(() => {
   const resList = llmList.value
-    .filter(item => {
+    .filter(({ modelType }) => {
       if (choosenFilter.value.model == 'all') {
         return true;
       } else {
-        return item.llmName.startsWith(choosenFilter.value.model)
+        return choosenFilter.value.model == modelType
       }
     })
-    .filter(({ llmName }) => {
+    .filter(({ optimizeType }) => {
       const { optimize } = choosenFilter.value;
       if (optimize == 'all') {
         return true;
       } else {
-        const hasOptimize = llmName.includes('-');
-        const ifWhite = llmName.endsWith('whiteList')
-        if (optimize == 'cos') {
-          return hasOptimize && !ifWhite;
-        } else if (optimize == 'whiteList') {
-          return hasOptimize && ifWhite
-        } else {
-          return !hasOptimize;
-        }
+        return optimize == optimizeType
       }
     })
 
