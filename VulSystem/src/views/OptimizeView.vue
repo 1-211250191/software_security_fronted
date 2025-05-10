@@ -173,7 +173,7 @@ const llmList = ref<LlmInfoType[]>([
   },
   {
     llmName: 'LLM-VulDet',
-    desc: '使用大语言模型（LLM）进行漏洞检测，能够检测出具体的版本信息',
+    desc: '使用大语言模型（LLM）进行漏洞检测，能够检测出具体的版本信息。',
     accuracy: 0.79,
     falseRate: 0.022,
     infoTag: '版本检测',
